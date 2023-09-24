@@ -22,9 +22,6 @@ namespace SpendingInfo.Transactions.Utils
             foreach (T x in source) { dest.Add(x); }
         }
 
-
-        // maybe use check twice?
-        // returns true when reload is detected
         public static bool CheckReload(String fileName, HashSet<String> loadedFiles, bool promptReload = true)
         {
             if (loadedFiles.Contains(fileName))
@@ -37,41 +34,6 @@ namespace SpendingInfo.Transactions.Utils
 
             return true; // haven't loaded file yet
         }
-
-/*        internal static void ExtendCollection<T>(ref TransactionTable<T> transactionTable, ref ObservableCollection<T> observableCollection) where T : Transaction
-        {
-            foreach(T t in transactionTable)
-                if(!observableCollection.Contains(t))
-                    observableCollection.Add(t);
-        }
-
-        internal static void ExtendCollection<T>(ref ICollection<T> currentTransactions, ref ObservableCollection<T> observableCollection) where T : Transaction
-        {
-            foreach(T transaction in currentTransactions)
-                observableCollection.Add(transaction);
-        }
-
-        internal static void ExtendCollection<T>(ref IEnumerable<T> sourceEnumerable, ref ObservableCollection<T> dest) where T : Transaction
-        {
-            foreach (T transaction in sourceEnumerable)
-                dest.Add(transaction);
-        }
-
-        public static void SelectWithinDates<T>(DateTime start, DateTime end, ref ICollection<T> source, ref ObservableCollection<T> dest) where T : Transaction
-        {
-            dest.Clear();
-            Func<T, bool> InRange = t => t.transactionDate.Date >= start.Date && t.transactionDate.Date <= end.Date;
-            IEnumerable<T> sourceEnumerable = source.Where(InRange);
-            ExtendCollection(ref sourceEnumerable, ref dest);
-        }
-
-        internal static void SelectWithinDates<T>(DateTime start, DateTime end, ref TransactionTable<T> source, ref ObservableCollection<T> dest) where T : Transaction
-        {
-            dest.Clear();
-            Func<T, bool> InRange = t => t.transactionDate.Date >= start.Date && t.transactionDate.Date <= end.Date;
-            IEnumerable<T> sourceEnumerable = source.Where(InRange);
-            ExtendCollection(ref sourceEnumerable, ref dest);
-        }*/
     }
 
     class BankCSVFormatException : Exception

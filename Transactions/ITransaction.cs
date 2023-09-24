@@ -65,10 +65,7 @@ namespace SpendingInfo.Transactions
 
         public bool Equals(ITransaction other) => this.GetID().Equals(other.GetID());
         public int GetHashCode() => GetID().GetHashCode();
-
         public string SerializeJSON() => JsonSerializer.Serialize(this);
-
-        public String ToString() { return $"[{GetDate()}] {GetDescription()} | {GetAmountString()}"; }
-        public static String ToString(ITransaction transaction) => transaction.ToString();
+        public static String ToString(ITransaction transaction) => $"[{transaction.GetDate()}] {transaction.GetDescription()} | {transaction.GetAmountString()}";
     }
 }

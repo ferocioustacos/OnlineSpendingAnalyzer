@@ -96,29 +96,16 @@ namespace SpendingInfo.Transactions
             return this.refCheck.ToString();
         }
 
-        public string GetID()
-        {
-            throw new NotImplementedException();
-        }
+        public string GetID() => this.transactionId;
 
-        public float GetAmount()
-        {
-            throw new NotImplementedException();
-        }
+        public float GetAmount() => this.transactionAmount;
 
-        public string GetDescription()
-        {
-            throw new NotImplementedException();
-        }
+        public string GetDescription() => this.transactionDescription;
 
-        public DateTime GetDate()
-        {
-            throw new NotImplementedException();
-        }
+        public DateTime GetDate() => this.transactionDate;
 
-        ITransaction.TransactionType ITransaction.GetType()
-        {
-            throw new NotImplementedException();
-        }
+        public void SetDescription(string description) => this.transactionDescription = description;
+        public TransactionType GetTransactionType() => this.transactionType;
+        public void SetTransactionType(TransactionType type) => this.transactionType = type;
     }
 }

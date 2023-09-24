@@ -1,19 +1,13 @@
-﻿using SpendingInfo.Transactions.Utils;
+﻿using CsvHelper;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
-using System.Diagnostics;
+using System.IO;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using System.Windows.Documents;
-using System.Text.Json;
-
-using static QuestPDF.Helpers.Colors;
-using System.IO;
+using System.Globalization;
 
 namespace SpendingInfo.Transactions
 {
@@ -22,13 +16,13 @@ namespace SpendingInfo.Transactions
         HashSet<String> filePaths = new HashSet<String>();
         Dictionary<String, ICollection<T>> fileAssociations = new Dictionary<string, ICollection<T>>();
         ICollection<T> allTransactions = new List<T>();
-        
+
         public IReadOnlySet<String> LoadedFiles() { return filePaths; }
         public IReadOnlyDictionary<String, ICollection<T>> Associations() { return fileAssociations; }
 
         public void AddTransactions(String fileSource, ICollection<T> transactions)
         {
-            if(filePaths.Contains(fileSource))
+            if (filePaths.Contains(fileSource))
                 fileAssociations[fileSource] = transactions;
             else
                 filePaths.Add(fileSource);
@@ -42,13 +36,13 @@ namespace SpendingInfo.Transactions
 
         public ICollection<T> GetTransactionFromPath(String path)
         {
-            if(filePaths.Contains(path)) return fileAssociations[path];
+            if (filePaths.Contains(path)) return fileAssociations[path];
             return new Collection<T>();
         }
 
         public IEnumerable<T> EnumerateTransactions()
         {
-            foreach(T transaction in this.allTransactions)
+            foreach (T transaction in this.allTransactions)
             {
                 yield return transaction;
             }
@@ -85,7 +79,7 @@ namespace SpendingInfo.Transactions
             return allTransactions;
         }
 
-        public void SelectWithDates(DateTime start, DateTime end)
+        public virtual void SelectWithDates(DateTime start, DateTime end)
         {
             this.Clear();
             Func<T, bool> InRange = t => t.GetDate().Date >= start.Date && t.GetDate().Date <= end.Date;
@@ -93,7 +87,7 @@ namespace SpendingInfo.Transactions
             foreach (T t in sourceEnumerable) this.Add(t);
         }
 
-        public void SearchByDescription(String query)
+        public virtual void SearchByDescription(String query)
         {
             this.Clear();
             Func<T, bool> searchFunc = t => t.GetDescription().ToLower().Contains(query.ToLower());
@@ -101,7 +95,7 @@ namespace SpendingInfo.Transactions
             foreach (T t in sourceEnumerable) this.Add(t);
         }
 
-        public void SelectWithinDatesAndSearch(DateTime start, DateTime end, String query)
+        public virtual void SelectWithinDatesAndSearch(DateTime start, DateTime end, String query)
         {
             this.Clear();
             Func<T, bool> searchFunc = t => t.GetDescription().ToLower().Contains(query.ToLower());
@@ -111,15 +105,6 @@ namespace SpendingInfo.Transactions
         }
 
         public ICollection<T> GetSelectedTransactions() => this;
-
-        // TODO: need a way to signal that the collection elements have been updated
-        //       so that it can properly update in the datagrid
-        public void SignalCollectionChange(IList<T> changedItems)
-        {
-/*            var e = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, changedItems);
-            var eh = new NotifyCollectionChangedEventHandler(null, e);
-            base.CollectionChanged += eh;
-*/        }
 
         public String SerializeJson()
         {
@@ -157,59 +142,28 @@ namespace SpendingInfo.Transactions
         {
             throw new NotImplementedException();
         }
-    }
-     
-    public class BankTransactionTable : TransactionTable<BankTransaction> { }
 
-    public class AmazonTransactionTable : TransactionTable<AmazonTransaction>
-    {
-        public new void SearchByDescription(String query)
+        public virtual void ExportSelectedAsCSV(String filePath)
         {
-            this.Clear();
-            Func<AmazonTransaction, bool> searchFunc = t => t.GetDescription().ToLower().Contains(query.ToLower());
-            IEnumerable<AmazonTransaction> sourceEnumerable = base.GetAllTransactions().Where(searchFunc);
-            foreach (AmazonTransaction t in sourceEnumerable) this.Add(t);
-        }
-
-        public new void SelectWithinDatesAndSearch(DateTime start, DateTime end, String query)
-        {
-            query = query.Trim();
-            AmazonTransaction.Category category = DetermineCategory(query);
-            this.Clear();
-            Func<AmazonTransaction, bool> InRange = t => t.GetDate().Date >= start.Date && t.GetDate().Date <= end.Date;
-            Func<AmazonTransaction, bool> SearchFunc = t => t.GetDescription().ToLower().Contains(query.ToLower());
-            Func<AmazonTransaction, bool> SameCategory = t => t.category == category;
-            IEnumerable<AmazonTransaction> sourceEnumerable;
-            if(category != AmazonTransaction.Category.UNCATEGORIZED)
+            using (var fileStream = File.Create(filePath))
             {
-                Debug.WriteLine("SEARCHING FOR CATEGORY");
-                sourceEnumerable = base.GetAllTransactions().Where(InRange).Where(SameCategory);
-            } else
-            {
-                sourceEnumerable = base.GetAllTransactions().Where(InRange).Where(SearchFunc);
+                this.ExportSelectedAsCSV(fileStream);
             }
-
-            foreach (AmazonTransaction t in sourceEnumerable) this.Add(t);
         }
 
-        public AmazonTransaction.Category DetermineCategory(String query)
+        public virtual void ExportSelectedAsCSV(Stream stream)
         {
-            String MATERIALS = "materials";
-            String TOOLS = "tools";
-            String OTHER = "other";
-            String[] categories = new String[] {MATERIALS, TOOLS, OTHER};
-
-            Debug.WriteLine($"query = '{query}'");
-            for(int i = 0; i < categories.Length; i++)
+            using (var writer = new StreamWriter(stream))
+            using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
             {
-                String category = categories[i];
-                Debug.WriteLine(category);
-                query = query.ToLower();
-                if (category.Equals(query.ToLower()))
-                    return (AmazonTransaction.Category) i;
+                this.ExportSelectedAsCSV(csv);
             }
-
-            return AmazonTransaction.Category.UNCATEGORIZED;
         }
+
+        public virtual void ExportSelectedAsCSV(CsvWriter csv)
+        {
+            throw new NotImplementedException("Each implementing class of TransactionTable must implement this function");
+        }
+
     }
 }

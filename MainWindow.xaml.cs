@@ -214,14 +214,36 @@ namespace SpendingInfo
 
         }
 
-        private void AmazonSaveJson_Click(object sender, RoutedEventArgs e)
+        private void AmazonSaveCSV_Click(object sender, RoutedEventArgs e)
         {
-            amazonTransactions.SaveToJson("AMAZON-TRANSACTIONS.json");
+            SaveFileDialog fileDialog = new SaveFileDialog();
+            fileDialog.FileName = "amazon-transactions.csv";
+            if(fileDialog.ShowDialog() == true)
+            {
+                if(!fileDialog.FileName.EndsWith(".csv"))
+                {
+                    fileDialog.FileName += ".csv";
+                }
+                amazonTransactions.ExportSelectedAsCSV(fileDialog.FileName);
+            }
         }
 
-        private void amazonTable_AutoGeneratingColumn(object sender, DataGridAutoGeneratingColumnEventArgs e)
+        private void AmazonLoadCSV_Click(object sender, RoutedEventArgs e)
         {
+            OpenFileDialog fileDialog = new OpenFileDialog();
+            fileDialog.ShowReadOnly = true;
 
+            if(fileDialog.ShowDialog() == true)
+            {
+                if(!fileDialog.FileName.EndsWith(".csv"))
+                {
+                    MessageBox.Show("File is not a csv", "Incorrect File Format");
+                }
+
+                var newTransactions = AmazonTransactionTable.FromCSV(fileDialog.FileName);
+                amazonTransactions.Clear();
+                amazonTransactions.AddTransactions(fileDialog.FileName, newTransactions);
+            }
         }
     }
 }

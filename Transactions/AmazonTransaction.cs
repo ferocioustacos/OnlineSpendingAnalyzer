@@ -23,26 +23,26 @@ namespace SpendingInfo.Transactions
         public String ASIN { get; }
         public Category category { get; set; }
 
-        public AmazonTransaction(String id, DateTime date, float amount, String itemName, String ASIN)
+        public AmazonTransaction(String id, DateTime date, float amount, String description, String ASIN)
         {
             this.transactionType = TransactionType.AMAZON;
             this.id = id;
             this.date = date;
             this.amount = amount;
-            this.description= itemName;
+            this.description= description;
             this.ASIN = ASIN;
             this.category = Category.UNCATEGORIZED;
         }
 
-        public AmazonTransaction(String id, DateTime date, float amount, String itemName, String ASIN, String sourceFile)
+        public AmazonTransaction(String id, DateTime date, float amount, String description, String ASIN, String fileSource)
         {
             this.transactionType = TransactionType.AMAZON;
             this.id = id;
             this.date = date;
             this.amount = amount;
-            this.description = itemName;
+            this.description = description;
             this.ASIN = ASIN;
-            this.fileSource = sourceFile;
+            this.fileSource = fileSource;
             this.category = Category.UNCATEGORIZED;
         }
 
@@ -51,6 +51,7 @@ namespace SpendingInfo.Transactions
         public void SetTransactionType(TransactionType type) => this.transactionType = type;
 
         public string GetID() => this.id;
+        public string GetASIN() => this.ASIN;
         public float GetAmount() => this.amount;
         public string GetDescription() => this.description;
         public void SetDescription(String description) => this.description = description;
