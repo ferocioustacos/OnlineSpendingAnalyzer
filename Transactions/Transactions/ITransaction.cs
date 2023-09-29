@@ -1,35 +1,26 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
-using System.Windows.Navigation;
 
-namespace SpendingInfo.Transactions
+namespace SpendingInfo.Transactions.Transactions
 {
     public interface ITransaction
     {
         public enum TransactionType { BANK_DEBIT, BANK_CREDIT, AMAZON, EBAY, UNKNOWN, ERROR };
 
-        public String GetID();
+        public string GetID();
         public float GetAmount();
 
         // Returns a formatted string of amount as $x or -$x
-        public String GetAmountString()
+        public string GetAmountString()
         {
             float amount = GetAmount();
             return amount > 0 ? $"${amount}" : $"-${Math.Abs(amount)}";
         }
 
-        public String GetDescription();
-        public void SetDescription(String description);
+        public string GetDescription();
 
         public DateTime GetDate();
 
         public TransactionType GetTransactionType();
-        public void SetTransactionType(TransactionType type);
 
         public bool IsBankTransaction() => GetTransactionType() == TransactionType.BANK_DEBIT || GetTransactionType() == TransactionType.BANK_CREDIT;
         public bool IsAmazonTransaction() => GetTransactionType() == TransactionType.AMAZON;
@@ -37,10 +28,10 @@ namespace SpendingInfo.Transactions
         public bool IsInvalidTransaction() => GetTransactionType() == TransactionType.UNKNOWN || GetTransactionType() == TransactionType.ERROR;
         public bool IsValidTransaction() => !IsInvalidTransaction();
 
-        public String TypeToString()
+        public string TypeToString()
         {
             TransactionType type = GetTransactionType();
-            switch(type)
+            switch (type)
             {
                 // bank transaction
                 case TransactionType.BANK_DEBIT:
@@ -63,9 +54,8 @@ namespace SpendingInfo.Transactions
             }
         }
 
-        public bool Equals(ITransaction other) => this.GetID().Equals(other.GetID());
+        public bool Equals(ITransaction other) => GetID().Equals(other.GetID());
         public int GetHashCode() => GetID().GetHashCode();
-        public string SerializeJSON() => JsonSerializer.Serialize(this);
-        public static String ToString(ITransaction transaction) => $"[{transaction.GetDate()}] {transaction.GetDescription()} | {transaction.GetAmountString()}";
+        public static string ToString(ITransaction transaction) => $"[{transaction.GetDate()}] {transaction.GetDescription()} | {transaction.GetAmountString()} | ";
     }
 }

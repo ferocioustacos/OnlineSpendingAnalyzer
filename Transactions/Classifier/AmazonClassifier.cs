@@ -1,23 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using SpendingInfo.Transactions.Transactions;
 using TorchSharp;
-using TorchSharp.Data;
-using TorchSharp.Modules;
 
 namespace SpendingInfo.Transactions.Classifier
 {
-    public class AmazonClassifier : ITransactionClassifier
+    public class AmazonClassifier : ITransactionClassifier<AmazonTransaction>
     {
         public static AmazonClassifier LoadModel(String modelPath)
         {
-            //            var seq = Sequential(("lin1", Linear(100, 10)));
             return new AmazonClassifier();
         }
-        
-        public string Classify(ITransaction t)
+
+        static ITransactionClassifier<AmazonTransaction> ITransactionClassifier<AmazonTransaction>.LoadModel(string path)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string Classify(AmazonTransaction t)
         {
             throw new NotImplementedException();
         }
@@ -34,6 +34,11 @@ namespace SpendingInfo.Transactions.Classifier
         }
 
         public DeviceType LoadDevice()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SaveModel(string path)
         {
             throw new NotImplementedException();
         }

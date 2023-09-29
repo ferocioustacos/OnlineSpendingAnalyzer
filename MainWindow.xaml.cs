@@ -1,32 +1,17 @@
 ﻿using Microsoft.Win32;
+using QuestPDF.Fluent;
+using QuestPDF.Infrastructure;
+using SpendingInfo.Transactions.Classifier;
+using SpendingInfo.Transactions.ReportDocuments;
+using SpendingInfo.Transactions.Tables;
+using SpendingInfo.Transactions.Transactions;
+using SpendingInfo.Transactions.Utils;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Text;
-
-using System.Threading.Tasks;
-
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-
-using System.Collections;
-using System.Collections.ObjectModel;
-
-using QuestPDF.Infrastructure;
-using QuestPDF.Fluent;
-
-using SpendingInfo.Transactions;
-using SpendingInfo.Transactions.Utils;
-
 
 namespace SpendingInfo
 {
@@ -40,6 +25,7 @@ namespace SpendingInfo
 
         // information for the amazon tab
         AmazonTransactionTable amazonTransactions;
+        AmazonClassifier amazonClassifier = new AmazonClassifier();
 
         DateTime amazonStartDate = DateTime.UnixEpoch;
         DateTime amazonEndDate = DateTime.Now;
@@ -97,24 +83,25 @@ namespace SpendingInfo
                 String fileName = fileDialog.FileName;
 
                 // TODO: debug this line (why does it not have any keys during reload?)
+/*                
                 HashSet<String> loadedFiles = bankTransactions.LoadedFiles().ToHashSet();
-
                 bool reloadFlag = Util.CheckReload(fileName, loadedFiles, true);
-                List<BankTransaction>? currentTransactions = BankUtil.LoadBankCSV(fileDialog, reloadFlag);
+*/                
+                List<BankTransaction>? currentTransactions = BankUtil.LoadBankCSV(fileDialog);
 
                 if (currentTransactions != null)
                 {
-                    if(reloadFlag)
+/*                    if(reloadFlag)
                     {
                         // remove old transactions
                         bankTransactions.RemoveTransactions(fileName);
                     }
-
+*/
                     /*                    // add to observable, bank, and general transaction table
                                         foreach (BankTransaction bt in currentTransactions) bankTransactions.Add(bt);
                                         AddToBankTransactions(fileDialog.FileName, currentTransactions);
                                         AddToTransactionTable(fileDialog.FileName, currentTransactions.Cast<Transaction>().ToList());*/
-                    bankTransactions.AddTransactions(fileDialog.FileName, currentTransactions);
+                    bankTransactions.AddTransactions(currentTransactions);
                     Debug.WriteLine($"Got {currentTransactions.Count()} transactions excluding balance updates.");
                 }
 
@@ -136,14 +123,14 @@ namespace SpendingInfo
             {
                 String fileName = fileDialog.FileName;
                 
-                HashSet<String> loadedFiles = amazonTransactions.LoadedFiles().ToHashSet();
+/*                HashSet<String> loadedFiles = amazonTransactions.LoadedFiles().ToHashSet();
                 bool reloadFlag = Util.CheckReload(fileName, loadedFiles, true);
-                ICollection<AmazonTransaction> currentTransactions = AmazonUtil.LoadFromZIP(fileName, reloadFlag);
+*/                
+                ICollection<AmazonTransaction> currentTransactions = AmazonUtil.LoadFromZIP(fileName);
 
-                if(reloadFlag) { amazonTransactions.RemoveTransactions(fileName); }
-
-                amazonTransactions.AddTransactions(fileName, currentTransactions);
-//                Util.ExtendCollection(ref currentTransactions, ref selectedAmazonTransactions);
+/*                if(reloadFlag) { amazonTransactions.RemoveTransactions(fileName); }
+*/
+                amazonTransactions.AddTransactions(currentTransactions);
                 Debug.WriteLine($"Got {currentTransactions.Count()} amazon items");
             }
 
@@ -199,17 +186,12 @@ namespace SpendingInfo
             }
         }
 
-        private AmazonTransaction.Category GetRandomAmazonCategory()
-        {
-            int index = new Random().Next() % 3;
-            return (AmazonTransaction.Category)index;
-        }
-
         private void RandomizeAmazonTransactions(object sender, RoutedEventArgs e)
         {
+            Random rand = new Random();
             foreach(AmazonTransaction at in amazonTransactions.EnumerateTransactions())
             {
-                at.category = GetRandomAmazonCategory();
+                at.Category = rand.Next(AmazonTransaction.Categories.Count);
             }
 
         }
@@ -241,9 +223,14 @@ namespace SpendingInfo
                 }
 
                 var newTransactions = AmazonTransactionTable.FromCSV(fileDialog.FileName);
-                amazonTransactions.Clear();
-                amazonTransactions.AddTransactions(fileDialog.FileName, newTransactions);
+                amazonTransactions.ClearAll();
+                amazonTransactions.AddTransactions(newTransactions);
             }
+        }
+
+        private void AmazonLabelOrders_Click(object sender, RoutedEventArgs eventArgs)
+        {
+            
         }
     }
 }

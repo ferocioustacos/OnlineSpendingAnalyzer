@@ -1,22 +1,15 @@
 ﻿using CsvHelper;
 using Microsoft.Win32;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
+using SpendingInfo.Transactions.Transactions;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Security.Policy;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-
-using SpendingInfo;
-using System.IO;
 using System.Globalization;
-
-using QuestPDF.Helpers;
-using QuestPDF.Infrastructure;
-using QuestPDF.Drawing;
-using QuestPDF.Fluent;
+using System.IO;
+using System.Windows;
 
 namespace SpendingInfo.Transactions.Utils
 {
@@ -203,7 +196,7 @@ namespace SpendingInfo.Transactions.Utils
             public BankTransactionsModel(ICollection <BankTransaction> transactions)
             {
                 this.transactions = transactions;
-                this.modelCreateTime = DateTime.Now;
+                modelCreateTime = DateTime.Now;
             }
         }
 
@@ -214,7 +207,7 @@ namespace SpendingInfo.Transactions.Utils
             public static int MAX_DESC_LENGTH = 45; // maximum number of characters that can conformtably fit on a single line
             public BankTransactionDocument(ICollection<BankTransaction> transactions)
             {
-                this.model = new BankTransactionsModel(transactions);
+                model = new BankTransactionsModel(transactions);
             }
 
             public BankTransactionDocument(BankTransactionsModel model)
@@ -248,7 +241,7 @@ namespace SpendingInfo.Transactions.Utils
 
                         column.Item().Text(text =>
                         {
-                            text.Span("Report Creation Date: " + this.model.modelCreateTime.ToString()).SemiBold();
+                            text.Span("Report Creation Date: " + model.modelCreateTime.ToString()).SemiBold();
                         });
                     });
                 });

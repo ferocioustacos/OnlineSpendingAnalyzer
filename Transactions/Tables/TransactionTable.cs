@@ -1,48 +1,33 @@
 ﻿using CsvHelper;
+using SpendingInfo.Transactions.Transactions;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
-using System.Globalization;
 
-namespace SpendingInfo.Transactions
+namespace SpendingInfo.Transactions.Tables
 {
     public class TransactionTable<T> : ObservableCollection<T>, ICollection<T>, IEnumerable<T> where T : ITransaction
     {
-        HashSet<String> filePaths = new HashSet<String>();
-        Dictionary<String, ICollection<T>> fileAssociations = new Dictionary<string, ICollection<T>>();
-        ICollection<T> allTransactions = new List<T>();
+        IList<T> allTransactions = new List<T>();
+        HashSet<string> transactionIDs = new HashSet<string>();
 
-        public IReadOnlySet<String> LoadedFiles() { return filePaths; }
-        public IReadOnlyDictionary<String, ICollection<T>> Associations() { return fileAssociations; }
-
-        public void AddTransactions(String fileSource, ICollection<T> transactions)
+        public void AddTransactions(IEnumerable<T> transactions)
         {
-            if (filePaths.Contains(fileSource))
-                fileAssociations[fileSource] = transactions;
-            else
-                filePaths.Add(fileSource);
-
-            foreach (T t in transactions)
+            Func<T, bool> idNotExists = t => !transactionIDs.Contains(t.GetID());
+            foreach (T t in transactions.Where(idNotExists))
             {
-                this.Add(t);
+                Add(t);
                 allTransactions.Add(t);
             }
         }
 
-        public ICollection<T> GetTransactionFromPath(String path)
-        {
-            if (filePaths.Contains(path)) return fileAssociations[path];
-            return new Collection<T>();
-        }
-
         public IEnumerable<T> EnumerateTransactions()
         {
-            foreach (T transaction in this.allTransactions)
+            foreach (T transaction in allTransactions)
             {
                 yield return transaction;
             }
@@ -50,28 +35,9 @@ namespace SpendingInfo.Transactions
 
         public void RemoveTransaction(T t)
         {
-            // 1.) Remove from fileAssociations list
-            foreach (var collection in fileAssociations.Values)
-                collection.Remove(t);
+            Remove(t);
+            transactionIDs.Remove(t.GetID());
             allTransactions.Remove(t);
-
-
-            // 2.) Remove from observable list
-            this.Remove(t);
-        }
-
-        public void RemoveTransactions(String path)
-        {
-            if (!filePaths.Contains(path)) return;
-
-            ICollection<T> transactions = fileAssociations[path];
-            foreach (var t in transactions)
-            {
-                this.Remove(t);
-                allTransactions.Remove(t);
-            }
-
-            fileAssociations.Remove(path);
         }
 
         public ICollection<T> GetAllTransactions()
@@ -81,58 +47,58 @@ namespace SpendingInfo.Transactions
 
         public virtual void SelectWithDates(DateTime start, DateTime end)
         {
-            this.Clear();
+            Clear();
             Func<T, bool> InRange = t => t.GetDate().Date >= start.Date && t.GetDate().Date <= end.Date;
             IEnumerable<T> sourceEnumerable = GetAllTransactions().Where(InRange);
-            foreach (T t in sourceEnumerable) this.Add(t);
+            foreach (T t in sourceEnumerable) Add(t);
         }
 
-        public virtual void SearchByDescription(String query)
+        public virtual void SearchByDescription(string query)
         {
-            this.Clear();
+            Clear();
             Func<T, bool> searchFunc = t => t.GetDescription().ToLower().Contains(query.ToLower());
             IEnumerable<T> sourceEnumerable = GetAllTransactions().Where(searchFunc);
-            foreach (T t in sourceEnumerable) this.Add(t);
+            foreach (T t in sourceEnumerable) Add(t);
         }
 
-        public virtual void SelectWithinDatesAndSearch(DateTime start, DateTime end, String query)
+        public virtual void SelectWithinDatesAndSearch(DateTime start, DateTime end, string query)
         {
-            this.Clear();
+            Clear();
             Func<T, bool> searchFunc = t => t.GetDescription().ToLower().Contains(query.ToLower());
             Func<T, bool> InRange = t => t.GetDate().Date >= start.Date && t.GetDate().Date <= end.Date;
-            IEnumerable<T> sourceEnumerable = GetAllTransactions().Where(InRange).Where(searchFunc);
-            foreach (T t in sourceEnumerable) this.Add(t);
+            IEnumerable<T> sourceEnumerable = from t in GetAllTransactions() where searchFunc(t) && InRange(t) select t;
+            foreach (T t in sourceEnumerable) Add(t);
         }
 
         public ICollection<T> GetSelectedTransactions() => this;
 
-        public String SerializeJson()
+        public string SerializeJson()
         {
             var options = new JsonSerializerOptions { };
-            return this.SerializeJson(options);
+            return SerializeJson(options);
         }
 
-        public String SerializeJson(JsonSerializerOptions options)
+        public string SerializeJson(JsonSerializerOptions options)
         {
-            var selectedTransactions = this.GetSelectedTransactions();
+            var selectedTransactions = GetSelectedTransactions();
             return JsonSerializer.Serialize(selectedTransactions, options);
         }
 
-        public void SaveToJson(String path)
+        public void SaveToJson(string path)
         {
             var options = new JsonSerializerOptions { WriteIndented = true };
             SaveToJson(path, options);
         }
 
-        public async void SaveToJson(String path, JsonSerializerOptions options)
+        public async void SaveToJson(string path, JsonSerializerOptions options)
         {
             using FileStream fileStream = File.Create(path);
-            var transactions = this.GetSelectedTransactions();
+            var transactions = GetSelectedTransactions();
             await JsonSerializer.SerializeAsync(fileStream, transactions, options);
             await fileStream.DisposeAsync();
         }
 
-        public static TransactionTable<T> LoadFromJson(String path)
+        public static TransactionTable<T> LoadFromJson(string path)
         {
             var options = new JsonSerializerOptions { };
             return LoadFromJson(path, options);
@@ -143,11 +109,18 @@ namespace SpendingInfo.Transactions
             throw new NotImplementedException();
         }
 
-        public virtual void ExportSelectedAsCSV(String filePath)
+        public void ClearAll()
+        {
+            Clear();
+            transactionIDs.Clear();
+            allTransactions.Clear();
+        }
+
+        public virtual void ExportSelectedAsCSV(string filePath)
         {
             using (var fileStream = File.Create(filePath))
             {
-                this.ExportSelectedAsCSV(fileStream);
+                ExportSelectedAsCSV(fileStream);
             }
         }
 
@@ -156,7 +129,7 @@ namespace SpendingInfo.Transactions
             using (var writer = new StreamWriter(stream))
             using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
             {
-                this.ExportSelectedAsCSV(csv);
+                ExportSelectedAsCSV(csv);
             }
         }
 
