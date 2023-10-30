@@ -1,0 +1,102 @@
+﻿<UserControl x:Class="SpendingInfo.Tabs.AmazonOrderLabelDisplay"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:SpendingInfo.Tabs.Amazon"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Themes/AmazonTabControl.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <Style x:Key="TextFieldStyle" TargetType="{x:Type TextBlock}">
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="TextAlignment" Value="Left"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
+                <Setter Property="Margin" Value="10, 0, 0, 0"/>
+                <Setter Property="FontSize" Value="13"/>
+            </Style>
+            <Style TargetType="{x:Type Border}">
+                <Setter Property="MinHeight" Value="30"/>
+                <Setter Property="Background" Value="{StaticResource AmazonContentBlue}"/>
+                <Setter Property="MinWidth" Value="500"/>
+                <Setter Property="Margin" Value="0, 10, 0, 5"/>
+                <Setter Property="CornerRadius" Value="10"/>
+            </Style>
+
+            <Style x:Key="HeaderStyle" TargetType="{x:Type TextBlock}">
+                <Setter Property="TextDecorations" Value="Underline"/>
+                <Setter Property="Margin" Value="5, 2, 0, 10"/>
+                <Setter Property="Foreground" Value="AntiqueWhite"/>
+                <Setter Property="FontSize" Value="15"/>
+            </Style>
+
+            <Style x:Key="BorderStyle" TargetType="{x:Type Border}">
+                <Setter Property="Margin" Value="0, 0, 0, 10"/>
+            </Style>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <Grid Background="{StaticResource AmazonContentGrey}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="10"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="10"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="5"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto" MinHeight="69"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="5"/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Column="1" Grid.Row="1" MinHeight="30">
+            <StackPanel VerticalAlignment="Center">
+                <TextBlock Text="Order ID" Style="{StaticResource HeaderStyle}"/>
+                <TextBlock x:Name="orderIDField" Text="ORDER ID FIELD" Style="{StaticResource TextFieldStyle}"/>
+                <TextBlock MinHeight="10"/>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Column="1" Grid.Row="2">
+            <StackPanel VerticalAlignment="Center">
+                <TextBlock Text="Order Date" Style="{StaticResource HeaderStyle}"/>
+                <TextBlock x:Name="orderDateField"  Text="ORDER DATE FIELD" Style="{StaticResource TextFieldStyle}"/>
+                <TextBlock MinHeight="10"/>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Column="1" Grid.Row="3">
+            <StackPanel VerticalAlignment="Center">
+                <TextBlock Text="Order Description" Style="{StaticResource HeaderStyle}"/>
+                <TextBlock x:Name="orderDescField" Text="ORDER DESCRIPTION FIELD" Style="{StaticResource TextFieldStyle}" 
+                           HorizontalAlignment="Left" TextWrapping="Wrap" Width="350"/>
+                <TextBlock MinHeight="10"/>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Column="1" Grid.Row="4">
+            <StackPanel VerticalAlignment="Center">
+                <TextBlock Text="Order ASIN" Style="{StaticResource HeaderStyle}"/>
+                <TextBlock x:Name="orderASINField" Text="ORDER ASIN FIELD" Style="{StaticResource TextFieldStyle}"/>
+                <TextBlock MinHeight="10"/>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Column="1" Grid.Row="5">
+            <StackPanel VerticalAlignment="Center">
+                <TextBlock Text="Order Category" Style="{StaticResource HeaderStyle}"/>
+                <TextBlock x:Name="orderCategoryField" Text="ORDER CATEGORY FIELD" Style="{StaticResource TextFieldStyle}"/>
+                <TextBlock MinHeight="10"/>
+            </StackPanel>
+        </Border>
+
+    </Grid>
+</UserControl>

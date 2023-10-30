@@ -58,6 +58,17 @@ namespace SpendingInfo.Transactions.Transactions
         }
         public float GetAmount() => amount;
 
+        public String GetAmountString()
+        {
+            float amount = GetAmount();
+            return amount > 0 ? $"${amount}" : $"-${Math.Abs(amount)}";
+        }
+
+        public string AmountStr
+        {
+            get { return GetAmountString(); }
+        }
+
         // Transaction Description
         private protected string description;
         private protected string searchableDescription; // stores a version of description that as processing already done

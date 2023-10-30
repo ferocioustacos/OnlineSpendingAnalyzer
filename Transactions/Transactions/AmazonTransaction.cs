@@ -48,6 +48,7 @@ namespace SpendingInfo.Transactions.Transactions
                 }
                 else
                 {
+                    category = -1;
                     categoryName = UNKNOWN_CATEGORY;
                 }
 
@@ -68,6 +69,7 @@ namespace SpendingInfo.Transactions.Transactions
             : base(id, date, amount, description, TransactionType.AMAZON)
         {
             asin = ASIN;
+            categoryName = UNKNOWN_CATEGORY;
             Category = UNKNOWN_CATEGORY_INT;
         }
 
@@ -75,6 +77,7 @@ namespace SpendingInfo.Transactions.Transactions
             : base(id, date, amount, description, TransactionType.AMAZON)
         {
             asin = ASIN;
+            categoryName = UNKNOWN_CATEGORY;
             Category = category;
         }
 

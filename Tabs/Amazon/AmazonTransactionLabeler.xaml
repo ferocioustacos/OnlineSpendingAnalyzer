@@ -1,0 +1,122 @@
+﻿<Window x:Class="SpendingInfo.Tabs.Amazon.AmazonTransactionLabeler"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SpendingInfo.Tabs"
+        xmlns:tabs="clr-namespace:SpendingInfo.Tabs"
+        xmlns:AmazonTransaction="clr-namespace:SpendingInfo.Transactions"
+        xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"         
+        mc:Ignorable="d"
+        Title="AmazonTransactionLabeler" 
+        Height="600" Width="875" 
+        WindowStartupLocation="CenterScreen"
+        Loaded="Window_Loaded"
+        >
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Themes/AmazonTabControl.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <Style x:Key="categoryButtonStyle" TargetType="{x:Type Button}">
+                <Setter Property="Background" Value="{StaticResource AmazonContentGrey}"/>
+                <Setter Property="Foreground" Value="AntiqueWhite"/>
+                <Setter Property="MinHeight" Value="25"/>
+            </Style>
+
+            <Style x:Key="CategoryDropDownMenuStyle" TargetType="{x:Type ComboBox}">
+                <Setter Property="Visibility" Value="Collapsed"/>
+                <Setter Property="IsEditable" Value="False"/>
+                <Setter Property="IsReadOnly" Value="True"/>
+                <Setter Property="FontSize" Value="20"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
+                <Setter Property="Foreground" Value="Black"/>
+            </Style>
+
+            <Style x:Key="CategoryMenuItemStyle" TargetType="{x:Type ComboBoxItem}">
+                <Setter Property="FontSize" Value="15"/>
+                <Setter Property="Background" Value="{StaticResource AmazonContentGrey}"/>
+                <Setter Property="Foreground" Value="White"/>
+            </Style>
+        </ResourceDictionary>
+    </Window.Resources>
+    
+    <Grid Background="{StaticResource AmazonContentBlue}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="auto"/> <!-- Cat 1 Button Row / Cat drop down menu-->
+            <RowDefinition Height="auto"/> 
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="10"/>
+        </Grid.RowDefinitions>  
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="10"/>
+            <ColumnDefinition Width="500"/>
+            <ColumnDefinition Width="30"/>
+            <ColumnDefinition Width="300"/>
+            <ColumnDefinition Width="10"/>
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Orientation="Vertical" Grid.Row="1" Grid.RowSpan="11" Grid.Column="1">
+            <tabs:AmazonOrderLabelDisplay x:Name="transactionDisplay"/>
+            <StackPanel Orientation="Horizontal" Margin="0, 10, 0, 0" HorizontalAlignment="Center">
+                <Button x:Name="prevTransactionBtn" Click="prevTransaction_Click">
+                    <svgc:SvgViewbox Source="\images\arrow-left.svg" Width="20"/>
+                </Button>
+                <TextBlock x:Name="transactionCounterBlock" Text="1/X" Margin="10, 0, 10, 0" VerticalAlignment="Center" Foreground="White"/>
+                <Button x:Name="nextTransactionBtn" Click="nextTransaction_Click">
+                    <svgc:SvgViewbox Source="\images\arrow-right.svg" Width="20"/>
+                </Button>
+            </StackPanel>
+        </StackPanel>
+
+       
+        <Button x:Name="category1Button" Content="Category 1" 
+                Grid.Row="1" Grid.Column="3" Style="{StaticResource categoryButtonStyle}" Margin="0, 0, 0, 10" Click="category1Button_Click"/>
+        <Button x:Name="category2Button" Content="Category 2" Grid.Row="2" Grid.Column="3" Style="{StaticResource categoryButtonStyle}" Margin="0, 0, 0, 10"/>
+        <Button x:Name="category3Button" Content="Category 3" Grid.Row="3" Grid.Column="3" Style="{StaticResource categoryButtonStyle}" Margin="0, 0, 0, 10"/>
+        <Button x:Name="category4Button" Content="Category 4" Grid.Row="4" Grid.Column="3" Style="{StaticResource categoryButtonStyle}" Margin="0, 0, 0, 10"/>
+        <Button x:Name="category5Button" Content="Category 5" Grid.Row="5" Grid.Column="3" Style="{StaticResource categoryButtonStyle}" Margin="0, 0, 0, 10"/>
+        <Button x:Name="category6Button" Content="Category 6" Grid.Row="6" Grid.Column="3" Style="{StaticResource categoryButtonStyle}" Margin="0, 0, 0, 10"/>
+        <Button x:Name="category7Button" Content="Category 7" Grid.Row="7" Grid.Column="3" Style="{StaticResource categoryButtonStyle}" Margin="0, 0, 0, 10"/>
+        <Button x:Name="category8Button" Content="Category 8" Grid.Row="8" Grid.Column="3" Style="{StaticResource categoryButtonStyle}" Margin="0, 0, 0, 10"/>
+        <Button x:Name="category9Button" Content="Category 9" Grid.Row="9" Grid.Column="3" Style="{StaticResource categoryButtonStyle}" Margin="0, 0, 0, 10"/>
+        <Button x:Name="category10Button" Content="Category 10" Grid.Row="10" Grid.Column="3" Style="{StaticResource categoryButtonStyle}" Margin="0, 0, 0, 10"/>
+        <Button x:Name="unknownButton" Content="Unknown" Grid.Row="11" Grid.Column="3" Style="{StaticResource categoryButtonStyle}" Margin="0, 0, 0, 10"/>
+
+        <StackPanel Orientation="Horizontal" Grid.Row="12" Grid.Column="3" HorizontalAlignment="Right">
+            <Button x:Name="closeLabelingButton" Content=" Close " MaxHeight="30" MaxWidth="100" Click="cancelLabelButton_Click"/>
+        </StackPanel>
+
+
+        <!-- If user created too many categories, then use a ListBox to choose the category -->
+        <!-- Then, enable these controls and disable the others -->
+
+        <ComboBox x:Name="comboxBoxSelector" Grid.Row="1" Grid.Column="3" 
+                  Visibility="Collapsed" 
+                  Style="{StaticResource CategoryDropDownMenuStyle}"
+                  ItemContainerStyle="{StaticResource CategoryMenuItemStyle}"
+                 >
+        </ComboBox>
+        
+        <StackPanel x:Name="comboBoxPanel" Orientation="Horizontal" Grid.Row="2" Grid.Column="3" HorizontalAlignment="Right" Visibility="Collapsed">
+            <Button x:Name="categoryConfirm" Content="Confirm Category" Margin="20, 0, 0, 0" Click="categoryConfirm_Click"/>
+            <Button x:Name="comboBoxConfirm" Content="Confirm Category And Next" Margin="20, 0, 0, 0" Click="confirmCategory_click"/>
+        </StackPanel>
+    
+
+
+
+    </Grid>
+</Window>

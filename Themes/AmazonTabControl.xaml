@@ -1,0 +1,52 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="/Themes/CommonControlStyling.xaml"/>
+    </ResourceDictionary.MergedDictionaries>
+
+    <SolidColorBrush x:Key="AmazonContentBlue">#FF304960</SolidColorBrush>
+    <SolidColorBrush x:Key="AmazonContentGrey">#FF616879</SolidColorBrush>
+
+    <Style x:Key="AmazonGenericButtonStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource RoundedButtonStyle}">
+        <Setter Property="Background" Value="{StaticResource AmazonContentGrey}"/>
+        <Setter Property="Foreground" Value="White"/>
+
+        <!-- Removes default anim behavior when mouse over button -->
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid Background="{TemplateBinding Background}">
+                        <ContentPresenter/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Cursor" Value="Hand"/>
+            </Trigger>
+        </Style.Triggers>
+
+    </Style>
+
+    <Style x:Key="AmazonDataGridStyle" TargetType="{x:Type DataGrid}">
+        <Setter Property="Background" Value="{StaticResource AmazonContentGrey}"/>
+        <Setter Property="RowBackground" Value="{StaticResource AmazonContentGrey}"/>
+        <Setter Property="ColumnWidth" Value="*"/>
+    </Style>
+
+    <Style x:Key="ColumnTitleStyle" TargetType="{x:Type DataGridColumnHeader}">
+        <Setter Property="FontSize" Value="20"/>
+        <Setter Property="Background" Value="{StaticResource AmazonContentBlue}"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="BorderBrush" Value="White"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="2, 0, 0, 0"/>
+    </Style>
+
+    <Style x:Key="AmazonCellStyle" TargetType="{x:Type DataGridCell}">
+        <Setter Property="Foreground" Value="White"/>
+    </Style>
+</ResourceDictionary>

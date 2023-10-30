@@ -1,0 +1,139 @@
+﻿<UserControl
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:av="http://schemas.microsoft.com/expression/blend/2008" 
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    mc:Ignorable="av" 
+    x:Class="SpendingInfo.Tabs.AmazonTabContent"
+    xmlns:svgc="http://sharpvectors.codeplex.com/svgc/" 
+    xmlns:tables="clr-namespace:SpendingInfo.Transactions.Tables">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Themes/CommonControlStyling.xaml"/>
+                <ResourceDictionary Source="/Themes/AmazonTabControl.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    
+    <Grid Background="#FF304960" x:Name="contentGrid">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="10"/> <!-- [0] Border -->
+            <ColumnDefinition Width="auto"/> <!-- [1] Load ZIP button -->
+            <ColumnDefinition Width="10"/> <!-- [2] Border -->
+            <ColumnDefinition Width="auto"/> <!-- [3] Load CSV Button -->
+            <ColumnDefinition Width="10"/> <!-- [4] Border -->
+            <ColumnDefinition Width="auto"/> <!-- [5] Save CSV Button -->
+            <ColumnDefinition Width="auto"/> <!-- [6] Date Selection StackPanel -->
+            <ColumnDefinition Width="auto"/> <!-- [7] Manual label button -->
+            <ColumnDefinition Width="auto"/> <!-- [8] Automatic label button -->
+            <ColumnDefinition Width="auto"/> <!-- [9] Generate Report button -->
+            <ColumnDefinition Width="*"/> <!-- [10] takes up the rest of the available space -->
+            <ColumnDefinition Width="10"/> <!-- [11] Border -->
+        </Grid.ColumnDefinitions>
+        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="10"/> <!-- [0] Border (top) | (buttons) -->
+            <RowDefinition Height="auto"/> <!-- [1] User Control-->
+            <RowDefinition Height="10"/> <!-- [2] Border (user control) | (search) -->
+            <RowDefinition Height="auto"/> <!-- [3] Search Bar Space -->
+            <RowDefinition Height="10"/> <!-- [4] Border (search) | (transaction table) -->
+            <RowDefinition Height="*" /> <!-- [5] data table, requires Height="*" to ensure scroll bar works (limits height of datagrid)-->
+            <RowDefinition Height="10"/> <!-- [6] Border -->
+        </Grid.RowDefinitions>
+        
+        <!-- Transaction Display Functionality -->
+        <DataGrid x:Name="amazonTable" 
+                  Grid.Column="1" Grid.Row="5" Grid.ColumnSpan="10"
+                  AutoGenerateColumns="False" ItemsSource="{Binding amazonTransactions}"
+                  Style="{StaticResource AmazonDataGridStyle}" HeadersVisibility="Column" FontSize="14"
+                  >
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Date" HeaderStyle="{StaticResource ColumnTitleStyle}" CellStyle="{StaticResource AmazonCellStyle}" MaxWidth="100" 
+                                   Binding="{Binding Date, StringFormat='MM/dd/yyy'}" IsReadOnly="True" />
+                <DataGridTextColumn Header="Item Description" HeaderStyle="{StaticResource ColumnTitleStyle}" CellStyle="{StaticResource AmazonCellStyle}"
+                                    Binding="{Binding Description}" IsReadOnly="False" />
+                <DataGridTextColumn Header="Amount" HeaderStyle="{StaticResource ColumnTitleStyle}"  MaxWidth="100" CellStyle="{StaticResource AmazonCellStyle}"
+                                    Binding="{Binding Amount, StringFormat='C'}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Category" HeaderStyle="{StaticResource ColumnTitleStyle}" MinWidth="100" CellStyle="{StaticResource AmazonCellStyle}"
+                                    Binding="{Binding CategoryName}" IsReadOnly="True"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- Loading Functionality -->
+        <Button Grid.Column="1" Grid.Row="1" 
+                Style="{StaticResource AmazonGenericButtonStyle}"
+                Click="AmazonLoadZip_Click"
+                >
+            <StackPanel Orientation="Vertical">
+                <svgc:SvgViewbox Source="/images/add-folder.svg" Height="41" Margin="0, 2, 0, 5"/>
+                <TextBlock FontFamily="Arial" Foreground="White" Width="80" TextAlignment="Center" Height="12">Load ZIP</TextBlock>
+            </StackPanel>
+        </Button>
+
+        <Button Grid.Column="3" Grid.Row="1"
+                Style="{StaticResource AmazonGenericButtonStyle}"
+                Click="AmazonLoadCSV_Click"
+                >
+            <StackPanel Orientation="Vertical">
+                <svgc:SvgViewbox Source="\images\upload-square.svg" Height="41" Margin="0, 2, 0, 5"/>
+                <TextBlock FontFamily="Arial" Foreground="White" Width="80"  TextAlignment="Center">Load CSV File</TextBlock>
+            </StackPanel>
+        </Button>
+
+        <Button Grid.Column="5" Grid.Row="1" 
+                Style="{StaticResource AmazonGenericButtonStyle}"
+                Click="AmazonSaveCSV_Click"  
+                >
+            <StackPanel Orientation="Vertical">
+                <svgc:SvgViewbox Source="\images\save-floppy-disk.svg" Height="41" Margin="0, 2, 0, 5"/>
+                <TextBlock FontFamily="Arial" Foreground="White" Width="80" Height="12" TextAlignment="Center">Save as CSV</TextBlock>
+            </StackPanel>
+        </Button>
+
+
+        <!-- Date Selection-->
+        <StackPanel Orientation="Vertical" Grid.Row="1" Grid.Column="6" Grid.RowSpan="1" Margin="10, 0, 0, 0">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Start Date:" Width="60" TextAlignment="Left" VerticalAlignment="Center" HorizontalAlignment="Left" Foreground="White"/>
+                <DatePicker SelectedDateFormat="Long" FirstDayOfWeek="Sunday" Width="214" x:Name="amazonStartDateSelector" SelectedDateChanged="amazonStartDateSelector_SelectedDateChanged"/>
+                <Button Content="Clear Date" Width="69" Margin="14, 0, 0, 0" OpacityMask="Black" Height="24" Click="ClearAmazonStartDate_Click" />
+            </StackPanel>
+            
+            <StackPanel Orientation="Horizontal" Margin="0, 10, 0, 0">
+                <TextBlock Text=" End Date:" Width="60" TextAlignment="Left" VerticalAlignment="Center" HorizontalAlignment="Left" Foreground="White"/>
+                <DatePicker SelectedDateFormat="Long" FirstDayOfWeek="Sunday" Width="214" x:Name="amazonEndDateSelector" SelectedDateChanged="amazonEndDateSelector_SelectedDateChanged"/>
+                <Button Content="Clear Date" Width="69" Margin="14, 0, 0, 0" OpacityMask="Black" Height="24" Click="ClearAmazonEndDate_Click"/>
+            </StackPanel>
+        </StackPanel>
+
+
+        <!-- Search Bar Functionality -->
+
+        <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="6">
+            <TextBlock Text="Search:  " VerticalAlignment="Center" HorizontalAlignment="Left" Foreground="White"/>
+            <TextBox 
+                 AutomationProperties.HelpText="Search by Item Name" ToolTip="Search by Item Name" 
+                 SelectionChanged="amazonSearch_SelectionChanged" 
+                 Height="22" FontSize="16" MinWidth="250" MaxWidth="500" 
+                 x:Name="amazonSearchBar" 
+                 />
+        </StackPanel>
+
+        <!-- Labeling Functionality -->
+        <!-- TODO: fix styling later to match other buttons -->
+        <Button Content="Manually Label Orders" Click="AmazonLabelOrders_Click" Grid.Column="7" Grid.Row="1" Margin="10"/>
+
+        <!-- Other Functionality -->
+        <Button Grid.Row="1" Grid.Column="9" 
+                Style="{StaticResource AmazonGenericButtonStyle}"
+                Click="AmazonReport_Click" 
+                >
+            <StackPanel Orientation="Vertical">
+                <svgc:SvgViewbox Source="/images/submit-document.svg" Height="41" Margin="0, 2, 0, 5"/>
+                <TextBlock FontFamily="Arial" TextAlignment="Center" Foreground="White" Width="95" Height="15">Generate Report</TextBlock>
+            </StackPanel>
+        </Button>
+    </Grid>
+</UserControl>

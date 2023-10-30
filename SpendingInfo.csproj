@@ -11,10 +11,40 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="images\add-folder.svg" />
+    <None Remove="images\arrow-left.svg" />
+    <None Remove="images\arrow-right.svg" />
+    <None Remove="images\next-button.svg" />
+    <None Remove="images\save-floppy-disk.svg" />
+    <None Remove="images\submit-document.svg" />
+    <None Remove="images\upload-square.svg" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="CsvHelper" Version="30.0.1" />
     <PackageReference Include="QuestPDF" Version="2023.6.1" />
-    <PackageReference Include="TorchSharp" Version="0.100.4" />
-    <PackageReference Include="TorchSharp-cuda-windows" Version="0.100.4" />
+    <PackageReference Include="SharpVectors" Version="1.8.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="images\add-folder.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="images\arrow-left.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="images\arrow-right.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="images\save-floppy-disk.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="images\submit-document.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="images\upload-square.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

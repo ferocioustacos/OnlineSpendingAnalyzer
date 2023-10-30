@@ -3,6 +3,7 @@ using SpendingInfo.Transactions.Transactions;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -12,7 +13,19 @@ namespace SpendingInfo.Transactions.Tables
 {
     public class TransactionTable<T> : ObservableCollection<T>, ICollection<T>, IEnumerable<T> where T : ITransaction
     {
-        IList<T> allTransactions = new List<T>();
+        public override event NotifyCollectionChangedEventHandler? CollectionChanged;
+        public void RaiseCollectionChanged(NotifyCollectionChangedAction action=NotifyCollectionChangedAction.Reset, object? item=null)
+        {
+            if(item != null)
+            {
+                CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(action, item));
+            } else
+            {
+                CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(action));
+            }
+        }
+
+        protected IList<T> allTransactions = new List<T>();
         HashSet<string> transactionIDs = new HashSet<string>();
 
         public void AddTransactions(IEnumerable<T> transactions)
@@ -71,43 +84,6 @@ namespace SpendingInfo.Transactions.Tables
         }
 
         public ICollection<T> GetSelectedTransactions() => this;
-
-        public string SerializeJson()
-        {
-            var options = new JsonSerializerOptions { };
-            return SerializeJson(options);
-        }
-
-        public string SerializeJson(JsonSerializerOptions options)
-        {
-            var selectedTransactions = GetSelectedTransactions();
-            return JsonSerializer.Serialize(selectedTransactions, options);
-        }
-
-        public void SaveToJson(string path)
-        {
-            var options = new JsonSerializerOptions { WriteIndented = true };
-            SaveToJson(path, options);
-        }
-
-        public async void SaveToJson(string path, JsonSerializerOptions options)
-        {
-            using FileStream fileStream = File.Create(path);
-            var transactions = GetSelectedTransactions();
-            await JsonSerializer.SerializeAsync(fileStream, transactions, options);
-            await fileStream.DisposeAsync();
-        }
-
-        public static TransactionTable<T> LoadFromJson(string path)
-        {
-            var options = new JsonSerializerOptions { };
-            return LoadFromJson(path, options);
-        }
-
-        public static TransactionTable<T> LoadFromJson(string path, JsonSerializerOptions options)
-        {
-            throw new NotImplementedException();
-        }
 
         public void ClearAll()
         {

@@ -4,27 +4,28 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using System.IO;
 using System.IO.Compression;
+using System.IO;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace SpendingInfo.Transactions.Utils
+namespace SpendingInfo.Transactions.Util.FileLoader
 {
-    internal static class AmazonUtil
+    internal class AmazonLoader
     {
-        // returns path of the file
         public static String[] DEFAULT_ORDER_FILENAMES { get; } = { "OrderHistory" };
         public static String[] DEFAULT_RETURN_FILENAMES { get; } = { "CustomerReturns", "OrdersReturned" };
         public static String[] DEFAULT_ORDER_ID_FORMATS { get; } = { "OrderId", "Order ID", "Order Id" };
+
         public static String[] OrderFileNames { get; set; } = DEFAULT_ORDER_FILENAMES;
         public static String[] ReturnFileNames { get; set; } = DEFAULT_RETURN_FILENAMES;
-
         public static String[] OrderIdFormats { get; set; } = DEFAULT_ORDER_ID_FORMATS;
 
-        public static ICollection<AmazonTransaction> LoadFromZIP(String zipFilePath, bool reload=true, bool ignoreReturned=true)
+        public static ICollection<AmazonTransaction> LoadFromZIP(String zipFilePath, bool reload = true, bool ignoreReturned = true)
         {
-            List<AmazonTransaction> amazonTransactions= new List<AmazonTransaction>();
-            if(!reload) { return amazonTransactions; }
+            List<AmazonTransaction> amazonTransactions = new List<AmazonTransaction>();
+            if (!reload) { return amazonTransactions; }
 
             using (ZipArchive archive = ZipFile.OpenRead(zipFilePath))
             {
@@ -33,7 +34,7 @@ namespace SpendingInfo.Transactions.Utils
                 List<ZipArchiveEntry> returnEntries = new List<ZipArchiveEntry>();
 
 
-                foreach(ZipArchiveEntry entry in archive.Entries)
+                foreach (ZipArchiveEntry entry in archive.Entries)
                 {
                     String fileName = Path.GetFileName(entry.FullName);
                     _AmazonFileType fileType = GetAmazonFileType(fileName);
@@ -44,20 +45,20 @@ namespace SpendingInfo.Transactions.Utils
                             continue; // if not a csv, ignore it
                         }
 
-                        if(fileType == _AmazonFileType.ORDER) orderEntries.Add(entry);
+                        if (fileType == _AmazonFileType.ORDER) orderEntries.Add(entry);
                         else returnEntries.Add(entry);
                     }
                 }
 
                 // 1.) Get all returned orders
                 HashSet<String> returnedOrders = new HashSet<string>();
-                foreach(ZipArchiveEntry entry in returnEntries)
+                foreach (ZipArchiveEntry entry in returnEntries)
                 {
                     returnedOrders.UnionWith(ReadReturnedOrdersFromZIP(entry));
                 }
 
                 // 2.) Get all orders that have not been returned
-                foreach(ZipArchiveEntry entry in orderEntries)
+                foreach (ZipArchiveEntry entry in orderEntries)
                 {
                     IEnumerable<AmazonTransaction> transactions = ReadPurchasesFromZIP(entry);
                     amazonTransactions.AddRange(transactions.Where(t => !returnedOrders.Contains(t.ID)));
@@ -72,7 +73,7 @@ namespace SpendingInfo.Transactions.Utils
             FileAccess fileAccess = FileAccess.Read,
             FileShare fileShare = FileShare.Read,
             int bufferSize = 4096,
-            FileOptions fileOptions=FileOptions.SequentialScan | FileOptions.DeleteOnClose)
+            FileOptions fileOptions = FileOptions.SequentialScan | FileOptions.DeleteOnClose)
         {
             String tempPath = Path.GetTempPath();
             String entryName = entry.Name;
@@ -131,7 +132,7 @@ namespace SpendingInfo.Transactions.Utils
                 // figure out which id header the file uses
                 String? idField = OrderHeader.GetIDFormat(csv.HeaderRecord);
 
-                if(idField == null)
+                if (idField == null)
                     return returnedIds; // id header not found
 
                 while (csv.Read())
@@ -151,7 +152,7 @@ namespace SpendingInfo.Transactions.Utils
             {
                 foreach (String header in headerRecord)
                     foreach (String format in OrderIdFormats)
-                        if (header.Equals(format)) return header;
+                        if (header.Contains(format)) return header;
 
                 return null;
             }
@@ -166,7 +167,7 @@ namespace SpendingInfo.Transactions.Utils
         private static IReadOnlyList<String> DATE_FORMATS { get; } = new String[] { "yyyy-MM-ddTHH:mm:ssZ" };
         private static AmazonTransaction? ReadNextAmazonTransaction(CsvReader csv, String idField, String fileName)
         {
-            String id = "", dateStr ="", itemName = "", asin = "";
+            String id = "", dateStr = "", itemName = "", asin = "";
             float amount = 0.0f;
 
             // all items are required, if any fail then absolute fail
@@ -175,15 +176,16 @@ namespace SpendingInfo.Transactions.Utils
                 bool gotID = GetField(csv, idField, out id);
                 bool gotDateStr = GetField(csv, OrderHeader.ORDER_DATE, out dateStr);
                 bool gotItemName = GetField(csv, OrderHeader.ITEM_NAME, out itemName);
-                bool gotASIN= GetField(csv, OrderHeader.ASIN, out asin);
+                bool gotASIN = GetField(csv, OrderHeader.ASIN, out asin);
                 bool gotAmount = GetField(csv, OrderHeader.TOTAL_COST, out amount);
 
-                if( !(gotID && gotDateStr && gotItemName && gotASIN && gotAmount) )
+                if (!(gotID && gotDateStr && gotItemName && gotASIN && gotAmount))
                 {
                     return null;
                 }
 
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 Debug.WriteLine("Failed to read order. " + ex.Message);
                 return null;
@@ -203,22 +205,23 @@ namespace SpendingInfo.Transactions.Utils
             try
             {
                 T? read_data = csv.GetField<T>(field);
-                if(read_data == null)
+                if (read_data == null)
                     return false;
                 data = read_data;
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 Debug.WriteLine("Failed to get field " + ex.Message);
                 return false;
             }
-            return true;            
+            return true;
         }
 
 
         private enum _AmazonFileType { ORDER, RETURN, UNKNOWN };
         private static _AmazonFileType GetAmazonFileType(String fileName)
         {
-            if(OrderFileNames.Any(fileName.Contains))
+            if (OrderFileNames.Any(fileName.Contains))
             {
                 return _AmazonFileType.ORDER;
             }

@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SpendingInfo" 
-        xmlns:transactions="clr-namespace:SpendingInfo.Transactions" 
+        xmlns:tabs="clr-namespace:SpendingInfo.Tabs"
         mc:Ignorable="d"
         Title="Spending Info" 
         Height="765" 
@@ -13,48 +13,11 @@
         >
     <Grid>
         <TabControl>
-            <TabItem Header="Bank Info" Width="110" Height="40">
-                <Grid Background="#FFE5E5E5">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="165*"/>
-                        <ColumnDefinition Width="1106*"/>
-                    </Grid.ColumnDefinitions>
-                    <Button Content="Select Bank CSV" HorizontalAlignment="Left" Margin="96,64,0,0" VerticalAlignment="Top" Height="73" Width="264" Click="BankCSV_Click" Grid.ColumnSpan="2"/>
-                    <DataGrid x:Name="bankTable" Margin="76,137,152,42" Grid.ColumnSpan="2"/>
-                    <Button Content="Summary" HorizontalAlignment="Left" Margin="340,107,0,0" VerticalAlignment="Top" Click="ShowBankStats_Click" Grid.Column="1"/>
-                    <Button Content="Generate Report" HorizontalAlignment="Left" Margin="445,107,0,0" VerticalAlignment="Top" Click="BankReport_Click" Grid.Column="1" />
-                </Grid>
-            </TabItem>
-            <TabItem Header="Amazon Info" Width="110" Height="40">
-                <Grid Background="#FFE5E5E5">
-                    <Button Content="Load Zip File" HorizontalAlignment="Left" Margin="72,26,0,0" VerticalAlignment="Top" Height="29" Width="78" Click="AmazonLoadZip_Click"/>
-                    <DataGrid Name="amazonTable" Margin="58,128,47,51"  AutoGenerateColumns="False" ItemsSource="{Binding amazonTransactions}">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Width ="100" Header="Date" Binding="{Binding Date}" IsReadOnly="True" />
-                            <DataGridTextColumn Width="500" Header="Item Description" Binding="{Binding Description}" IsReadOnly="False" />
-                            <DataGridTextColumn Width="200" Header="Amount" Binding="{Binding Amount}"/>
-                            <DataGridTextColumn Width="100" Header="Category" Binding="{Binding CategoryName}" IsReadOnly="False"/>
-                        </DataGrid.Columns>
-                    </DataGrid>
-
-                    <DatePicker HorizontalAlignment="Left" Margin="303,27,0,0" VerticalAlignment="Top" SelectedDateFormat="Long" FirstDayOfWeek="Sunday" Width="215" Height="26" x:Name="amazonStartDateSelector" SelectedDateChanged="amazonStartDateSelector_SelectedDateChanged"/>
-                    <DatePicker HorizontalAlignment="Left" Margin="303,80,0,0" VerticalAlignment="Top" SelectedDateFormat="Long" FirstDayOfWeek="Sunday" Width="215" Height="26" x:Name="amazonEndDateSelector" SelectedDateChanged="amazonEndDateSelector_SelectedDateChanged"/>
-                    <Label Content="Start Date:" HorizontalAlignment="Left" Margin="221,28,0,0" VerticalAlignment="Top" Width="73"/>
-                    <Label Content="End Date:" HorizontalAlignment="Left" Margin="221,80,0,0" VerticalAlignment="Top" Width="73"/>
-                    <Button Content="Clear Date" HorizontalAlignment="Left" Margin="545,30,0,0" VerticalAlignment="Top" Width="77" Click="ClearAmazonStartDate_Click"/>
-                    <Button Content="Clear Date" HorizontalAlignment="Left" Margin="545,83,0,0" VerticalAlignment="Top" Width="77" Click="ClearAmazonEndDate_Click"/>
-                    <TextBox HorizontalAlignment="Left" Margin="677,88,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" AutomationProperties.HelpText="Search by Item Name" x:Name="amazonSearchBar" SelectionChanged="amazonSearch_SelectionChanged" />
-                    <Button Content="Generate Report" HorizontalAlignment="Left" Margin="1124,28,0,0" VerticalAlignment="Top" Height="26" Width="100" Click="AmazonReport_Click"/>
-                    <Button Content="Set categories" HorizontalAlignment="Left" Margin="677,30,0,0" VerticalAlignment="Top" Click="RandomizeAmazonTransactions"/>
-                    <Button Content="Save selected" HorizontalAlignment="Left" Margin="72,78,0,0" VerticalAlignment="Top" Width="79" Click="AmazonSaveCSV_Click"/>
-                    <Button Content="Load CSV File" HorizontalAlignment="Left" Margin="888,59,0,0" VerticalAlignment="Top" Height="29" Width="78" Click="AmazonLoadCSV_Click"/>
-                    <Button Content="Manually Label Orders" HorizontalAlignment="Left" Margin="1099,69,0,0" VerticalAlignment="Top" Height="29" Width="125" Click="AmazonLabelOrders_Click"/>
-                </Grid>
+            <TabItem Header="Amazon Info" Width="110" Height="40" Background="#FF304960" Foreground="#FF959696">
+                <tabs:AmazonTabContent x:Name="amazonTab"/>
             </TabItem>
             <TabItem Header="Settings" Width="110" Height="40">
-                <Grid Background="AliceBlue">
-
-                </Grid>
+                <tabs:AmazonSettingsWindow/>
             </TabItem>
         </TabControl>
     </Grid>

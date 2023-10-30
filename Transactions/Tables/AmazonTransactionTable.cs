@@ -9,10 +9,14 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 
+using SpendingInfo.Transactions.Util.FileLoader;
+using System.ComponentModel;
+
 namespace SpendingInfo.Transactions.Tables
 {
-    public class AmazonTransactionTable : TransactionTable<AmazonTransaction>
+    public class AmazonTransactionTable : TransactionTable<AmazonTransaction>, INotifyPropertyChanged
     {
+
         public AmazonTransactionTable(IEnumerable<AmazonTransaction> enumerable)
         {
             foreach (var transaction in enumerable)
@@ -55,6 +59,46 @@ namespace SpendingInfo.Transactions.Tables
             foreach (AmazonTransaction t in sourceEnumerable) Add(t);
         }
 
+        public void SetTransaction(string transactionId, AmazonTransaction transaction)
+        {
+            int transactionIdx = -1;
+            IList<AmazonTransaction> transactions = GetSelectedTransactions().ToList();
+            for(int i = 0; i < GetSelectedTransactions().Count; i++)
+            {
+                transactions[i].ID.Equals(transactionId);
+            }
+
+            if(transactionIdx != -1)
+            {
+                base.SetItem(transactionIdx, transaction);
+            }
+        }
+
+        public void SetCategory(string transactionID, int categoryIdx)
+        {
+            int transactionIdx = 0;
+            AmazonTransaction? transaction = null;
+            foreach (AmazonTransaction t in GetSelectedTransactions())
+            {
+                if (t.ID.Equals(transactionID))
+                {
+                    transaction = t;
+                }
+                transactionIdx++;
+            }
+            if(transaction == null) { return; }
+
+            transaction.Category = categoryIdx;
+            base.SetItem(transactionIdx, transaction);
+        }
+
+        public void SetCategory(int transactionIdx, int categoryIdx)
+        {
+            AmazonTransaction transaction = base[transactionIdx];
+            transaction.Category = categoryIdx;
+            base.SetItem(transactionIdx, transaction);
+        }
+
         public int DetermineCategory(string query)
         {
             IList<string> categories = AmazonTransaction.Categories;
@@ -81,7 +125,7 @@ namespace SpendingInfo.Transactions.Tables
         public static AmazonTransactionTable FromZIP(string filePath) 
         {
             return new AmazonTransactionTable(
-                AmazonUtil.LoadFromZIP(filePath, reload: true, ignoreReturned: true)
+                AmazonLoader.LoadFromZIP(filePath, reload: true, ignoreReturned: true)
             );
         }
 
