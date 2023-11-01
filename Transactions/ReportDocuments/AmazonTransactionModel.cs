@@ -6,10 +6,10 @@ namespace SpendingInfo.Transactions.ReportDocuments
 {
     public class AmazonTransactionModel
     {
-        public ICollection<AmazonTransaction> Transactions { get; }
+        public IReadOnlyCollection<AmazonTransaction> Transactions { get; }
         public DateTime ModelCreateTime { get; }
 
-        public AmazonTransactionModel(ICollection<AmazonTransaction> transactions)
+        public AmazonTransactionModel(IReadOnlyCollection<AmazonTransaction> transactions)
         {
             Transactions = transactions;
             ModelCreateTime = DateTime.Now;

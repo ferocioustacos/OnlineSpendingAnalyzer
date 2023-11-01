@@ -13,7 +13,7 @@ namespace SpendingInfo.Transactions.ReportDocuments
         public AmazonTransactionModel model { get; }
         public static int MAX_DESC_LENGTH = 45;
 
-        public AmazonTransactionDocument(ICollection<AmazonTransaction> transactions)
+        public AmazonTransactionDocument(IReadOnlyCollection<AmazonTransaction> transactions)
         {
             model = new AmazonTransactionModel(transactions);
         }

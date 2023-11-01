@@ -107,6 +107,11 @@ namespace SpendingInfo.Transactions.Transactions
         }
         public TransactionType GetTransactionType() => type;
 
+        public TransactionBase Clone()
+        {
+            return new TransactionBase(ID, Date, Amount, Description, Type);
+        }
+
         // Constructor
         private protected TransactionBase(string id, DateTime date, float amount, string description, TransactionType type)
         {

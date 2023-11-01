@@ -81,6 +81,14 @@ namespace SpendingInfo.Transactions.Transactions
             Category = category;
         }
 
+        public AmazonTransaction(AmazonTransaction t)
+            : base(t.ID, t.Date, t.Amount, t.Description, t.Type)
+        {
+            asin = t.ASIN;
+            categoryName = t.CategoryName;
+            Category = t.Category;
+        }
+
         public string GetASIN() => ASIN;
         public string GetCategoryStr() => CategoryName;
         public void SetDescription(string description) => this.description = description;

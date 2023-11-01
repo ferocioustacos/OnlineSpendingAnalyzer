@@ -38,13 +38,13 @@ namespace SpendingInfo.Tabs
         {
             InitializeComponent();
             amazonTransactions = new AmazonTransactionTable();
-            amazonTable.ItemsSource = amazonTransactions;
+            amazonTable.ItemsSource = amazonTransactions.SelectedTransactions;
 
             #if DEBUG
-                AmazonTransaction.Categories = new String[]{ "Tech", "Clothes", "Other", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v"};
+                //AmazonTransaction.Categories = new String[]{ "Tech", "Clothes", "Other", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v"};
                 string filePath = "testing-data/amazon-transactions.csv";
-                IEnumerable<AmazonTransaction> currentTransactions = AmazonTransactionTable.FromCSV(filePath);
-                amazonTransactions.AddTransactions(currentTransactions);
+                var currentTransactions = AmazonTransactionTable.FromCSV(filePath);
+                amazonTransactions.AddTransactions(currentTransactions.AllTransactions);
             #endif
         }
 
@@ -77,6 +77,7 @@ namespace SpendingInfo.Tabs
         private void amazonSearch_SelectionChanged(object sender, RoutedEventArgs e)
         {
             amazonTransactions.SelectWithinDatesAndSearch(amazonStartDate, amazonEndDate, amazonSearchBar.Text);
+            amazonTable.Items.Refresh();
         }
 
         private void ClearAmazonStartDate_Click(object sender, RoutedEventArgs e)
@@ -99,7 +100,7 @@ namespace SpendingInfo.Tabs
             fileDialog.FileName = "report.pdf";
             if (fileDialog.ShowDialog() == true)
             {
-                ICollection<AmazonTransaction> transactions = amazonTransactions.GetSelectedTransactions();
+                IReadOnlyCollection<AmazonTransaction> transactions = amazonTransactions.GetSelectedTransactions();
                 AmazonTransactionDocument doc = new AmazonTransactionDocument(transactions);
                 doc.GeneratePdf(fileDialog.FileName);
                 MessageBoxResult res = MessageBox.Show("Open Report in default application?", "Report View Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question);
@@ -150,8 +151,7 @@ namespace SpendingInfo.Tabs
                 }
 
                 var newTransactions = AmazonTransactionTable.FromCSV(fileDialog.FileName);
-                amazonTransactions.ClearAll();
-                amazonTransactions.AddTransactions(newTransactions);
+                amazonTransactions.AddTransactions(newTransactions.GetAllTransactions());
             }
         }
 
@@ -162,6 +162,8 @@ namespace SpendingInfo.Tabs
             {
                 labelWindow.ShowDialog();
             }
+
+            RefreshTransactionDisplay();
         }
 
         public void SetCategory(string transactionID, int categoryIdx)
@@ -177,6 +179,7 @@ namespace SpendingInfo.Tabs
         public void RefreshTransactionDisplay()
         {
             amazonTransactions.RaiseCollectionChanged();
+            amazonTable.Items.Refresh();
         }
     }
 }

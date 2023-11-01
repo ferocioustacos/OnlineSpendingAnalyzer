@@ -47,4 +47,10 @@
     </Content>
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="testing-data\amazon-transactions.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

@@ -1,23 +1,47 @@
 ﻿using CsvHelper;
 using SpendingInfo.Transactions.Transactions;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Data.OleDb;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text.Json;
+using System.Windows.Navigation;
 
 namespace SpendingInfo.Transactions.Tables
 {
-    public class TransactionTable<T> : ObservableCollection<T>, ICollection<T>, IEnumerable<T> where T : ITransaction
+    public class TransactionTable<T> : INotifyCollectionChanged where T : ITransaction
     {
-        public override event NotifyCollectionChangedEventHandler? CollectionChanged;
-        public void RaiseCollectionChanged(NotifyCollectionChangedAction action=NotifyCollectionChangedAction.Reset, object? item=null)
+        protected IList<T> allTransactions = new List<T>(); // stores all transactions (is what is searched)
+        protected HashSet<string> transactionIDs = new HashSet<string>(); // keeps track of all the transactions
+
+        protected IList<T> selectedTransactions = new List<T>(); // what the 'user' can see
+        protected HashSet<string> selectedIDs = new HashSet<string>();
+
+        public IReadOnlyList<T> AllTransactions
         {
-            if(item != null)
+            get => (IReadOnlyList<T>) allTransactions;
+        }
+
+        public IReadOnlyList<T> SelectedTransactions
+        {
+            get => (IReadOnlyList<T>) selectedTransactions;
+        }
+
+        // INotifyCollectionChanged impl
+        public event NotifyCollectionChangedEventHandler? CollectionChanged;
+        public void RaiseCollectionChanged(NotifyCollectionChangedAction action = NotifyCollectionChangedAction.Reset, object? item = null, int? index = null)
+        {
+            if (item != null)
             {
+                if (index != null)
+                {
+                    var args = new NotifyCollectionChangedEventArgs(action, item, index);
+                    CollectionChanged?.Invoke(this, args);
+                }
                 CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(action, item));
             } else
             {
@@ -25,16 +49,62 @@ namespace SpendingInfo.Transactions.Tables
             }
         }
 
-        protected IList<T> allTransactions = new List<T>();
-        HashSet<string> transactionIDs = new HashSet<string>();
+        public void RaiseCollectionReplaceChanged(object oldItem, object newItem)
+        {
+            CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, oldItem, newItem));
+        }
+
+        // IEnumerable impl
+        public IEnumerator<T> GetSelectedEnumerator()
+        {
+            return selectedTransactions.GetEnumerator();
+        }
+
+        public void AddTransaction(T transaction)
+        {
+            if(transactionIDs.Contains(transaction.GetID()))
+            {
+                return;
+            }
+
+            transactionIDs.Add(transaction.GetID());
+            allTransactions.Add(transaction);
+        }
+
+        public void AddObservableTransaction(T transaction)
+        {
+            if(!transactionIDs.Contains(transaction.GetID()))
+            {
+                allTransactions.Add(transaction);
+                transactionIDs.Add(transaction.GetID());
+                selectedTransactions.Add(transaction);
+                RaiseCollectionChanged(NotifyCollectionChangedAction.Add, transaction);
+            }
+        }
+
+        public void AddSelectedTransaction(T transaction)
+        {
+            if(selectedIDs.Contains(transaction.GetID())) 
+            { 
+                return; 
+            }
+
+            selectedIDs.Add(transaction.GetID());
+            selectedTransactions.Add(transaction);
+        }
+
+        public void ClearSelected()
+        {
+            selectedIDs.Clear();
+            selectedTransactions.Clear();
+        }
 
         public void AddTransactions(IEnumerable<T> transactions)
         {
             Func<T, bool> idNotExists = t => !transactionIDs.Contains(t.GetID());
             foreach (T t in transactions.Where(idNotExists))
             {
-                Add(t);
-                allTransactions.Add(t);
+                AddObservableTransaction(t);
             }
         }
 
@@ -48,9 +118,10 @@ namespace SpendingInfo.Transactions.Tables
 
         public void RemoveTransaction(T t)
         {
-            Remove(t);
+            selectedTransactions.Remove(t);
             transactionIDs.Remove(t.GetID());
             allTransactions.Remove(t);
+            RaiseCollectionChanged(NotifyCollectionChangedAction.Remove, t);
         }
 
         public ICollection<T> GetAllTransactions()
@@ -60,36 +131,59 @@ namespace SpendingInfo.Transactions.Tables
 
         public virtual void SelectWithDates(DateTime start, DateTime end)
         {
-            Clear();
+            selectedTransactions.Clear();
             Func<T, bool> InRange = t => t.GetDate().Date >= start.Date && t.GetDate().Date <= end.Date;
             IEnumerable<T> sourceEnumerable = GetAllTransactions().Where(InRange);
-            foreach (T t in sourceEnumerable) Add(t);
+            foreach (T t in sourceEnumerable) selectedTransactions.Add(t);
         }
 
         public virtual void SearchByDescription(string query)
         {
-            Clear();
+            selectedTransactions.Clear();
             Func<T, bool> searchFunc = t => t.GetDescription().ToLower().Contains(query.ToLower());
             IEnumerable<T> sourceEnumerable = GetAllTransactions().Where(searchFunc);
-            foreach (T t in sourceEnumerable) Add(t);
+            foreach (T t in sourceEnumerable) selectedTransactions.Add(t);
         }
 
         public virtual void SelectWithinDatesAndSearch(DateTime start, DateTime end, string query)
         {
-            Clear();
+            selectedTransactions.Clear();
             Func<T, bool> searchFunc = t => t.GetDescription().ToLower().Contains(query.ToLower());
             Func<T, bool> InRange = t => t.GetDate().Date >= start.Date && t.GetDate().Date <= end.Date;
             IEnumerable<T> sourceEnumerable = from t in GetAllTransactions() where searchFunc(t) && InRange(t) select t;
-            foreach (T t in sourceEnumerable) Add(t);
+            foreach (T t in sourceEnumerable) selectedTransactions.Add(t);
         }
 
-        public ICollection<T> GetSelectedTransactions() => this;
+        public IReadOnlyCollection<T> GetSelectedTransactions() => (IReadOnlyCollection<T>) selectedTransactions;
+
+        public void SetTransaction(string transactionId, T transaction)
+        {
+            int transactionIdx = -1;
+            IList<T> transactions = GetSelectedTransactions().ToList();
+            for (int i = 0; i < GetSelectedTransactions().Count; i++)
+            {
+                transactions[i].GetID().Equals(transactionId);
+            }
+
+            SetTransaction(transactionIdx, transaction);
+        }
+
+        public void SetTransaction(int transactionIdx, T transaction)
+        {
+            if (transactionIdx != -1)
+            {
+                T old = (T) selectedTransactions[transactionIdx];
+                selectedTransactions[transactionIdx] = transaction;
+                RaiseCollectionReplaceChanged(old, transaction);
+            }
+        }
 
         public void ClearAll()
         {
-            Clear();
+            selectedTransactions.Clear();
             transactionIDs.Clear();
             allTransactions.Clear();
+            RaiseCollectionChanged(NotifyCollectionChangedAction.Reset);
         }
 
         public virtual void ExportSelectedAsCSV(string filePath)
@@ -113,6 +207,5 @@ namespace SpendingInfo.Transactions.Tables
         {
             throw new NotImplementedException("Each implementing class of TransactionTable must implement this function");
         }
-
     }
 }

@@ -11,17 +11,31 @@ using System.Security.Cryptography;
 
 using SpendingInfo.Transactions.Util.FileLoader;
 using System.ComponentModel;
+using System.Collections.Specialized;
 
 namespace SpendingInfo.Transactions.Tables
 {
-    public class AmazonTransactionTable : TransactionTable<AmazonTransaction>, INotifyPropertyChanged
+    public class AmazonTransactionTable : TransactionTable<AmazonTransaction>
     {
+
+        public AmazonTransactionTable(AmazonTransactionTable table)
+        {
+            foreach(var transaction in table.GetAllTransactions())
+            {
+                AddTransaction(transaction);
+            }
+
+            foreach(var transaction in table.GetSelectedTransactions())
+            {
+                AddObservableTransaction(transaction);
+            }
+        }
 
         public AmazonTransactionTable(IEnumerable<AmazonTransaction> enumerable)
         {
             foreach (var transaction in enumerable)
             {
-                Add(transaction);
+                AddObservableTransaction(transaction);
             }
         }
 
@@ -31,17 +45,20 @@ namespace SpendingInfo.Transactions.Tables
 
         public override void SearchByDescription(string query)
         {
-            Clear();
+            ClearSelected();
             Func<AmazonTransaction, bool> searchFunc = t => t.GetDescription().ToLower().Contains(query.ToLower());
             IEnumerable<AmazonTransaction> sourceEnumerable = GetAllTransactions().Where(searchFunc);
-            foreach (AmazonTransaction t in sourceEnumerable) Add(t);
+            foreach (AmazonTransaction t in sourceEnumerable) AddSelectedTransaction(t);
+            RaiseCollectionChanged();
         }
 
         public override void SelectWithinDatesAndSearch(DateTime start, DateTime end, string query)
         {
             query = query.Trim().ToLower();
-            int category = DetermineCategory(query);
-            this.Clear();
+            // See TODO note at `DetermineCategory` (tldr; replace with better version)
+            //int category = DetermineCategory(query);
+            int category = -1;
+            ClearSelected();
             Func<AmazonTransaction, bool> InRange = t => t.GetDate().Date >= start.Date && t.GetDate().Date <= end.Date;
             Func<AmazonTransaction, bool> SearchFunc = t => t.SearchableDescription.Contains(query);
             Func<AmazonTransaction, bool> SameCategory = t => t.Category == category;
@@ -55,24 +72,16 @@ namespace SpendingInfo.Transactions.Tables
             {
                 sourceEnumerable = GetAllTransactions().Where(InRange).Where(SearchFunc);
             }
-
-            foreach (AmazonTransaction t in sourceEnumerable) Add(t);
-        }
-
-        public void SetTransaction(string transactionId, AmazonTransaction transaction)
-        {
-            int transactionIdx = -1;
-            IList<AmazonTransaction> transactions = GetSelectedTransactions().ToList();
-            for(int i = 0; i < GetSelectedTransactions().Count; i++)
+            Debug.WriteLine($"sourceEnumerable contains {sourceEnumerable.Count()} elements.");
+            foreach (AmazonTransaction t in sourceEnumerable)
             {
-                transactions[i].ID.Equals(transactionId);
+                AddSelectedTransaction(t);
             }
 
-            if(transactionIdx != -1)
-            {
-                base.SetItem(transactionIdx, transaction);
-            }
+            RaiseCollectionChanged();
         }
+
+
 
         public void SetCategory(string transactionID, int categoryIdx)
         {
@@ -89,16 +98,18 @@ namespace SpendingInfo.Transactions.Tables
             if(transaction == null) { return; }
 
             transaction.Category = categoryIdx;
-            base.SetItem(transactionIdx, transaction);
+            SetTransaction(transactionIdx, transaction);
         }
 
         public void SetCategory(int transactionIdx, int categoryIdx)
         {
-            AmazonTransaction transaction = base[transactionIdx];
+            AmazonTransaction transaction = new AmazonTransaction(selectedTransactions[transactionIdx]);
             transaction.Category = categoryIdx;
-            base.SetItem(transactionIdx, transaction);
+            SetTransaction(transactionIdx, transaction);
         }
 
+        // TODO: replace with a version that requires a prefix, e.g. "category=Category" or "category={Category1, Category2, ...}"
+        //       should also return a pair containing a list of categories and a 'sanitized' query (without search params)
         public int DetermineCategory(string query)
         {
             IList<string> categories = AmazonTransaction.Categories;
@@ -147,15 +158,19 @@ namespace SpendingInfo.Transactions.Tables
                 csv.ReadHeader();
                 while(csv.Read())
                 {
-                    string id = csv.GetField<string>("ID");
-                    DateTime date = csv.GetField<DateTime>("Date");
-                    float amount = csv.GetField<float>("Amount");
-                    string description = csv.GetField<string>("Description");
-                    string asin = csv.GetField<string>("ASIN");
-                    int category = csv.GetField<int>("Category");
+                    try
+                    {
+                        string id = csv.GetField<string>("ID");
+                        DateTime date = csv.GetField<DateTime>("Date");
+                        float amount = csv.GetField<float>("Amount");
+                        string description = csv.GetField<string>("Description");
+                        string asin = csv.GetField<string>("ASIN");
+                        int category = csv.GetField<int>("Category");
 
-                    var transaction = new AmazonTransaction(id, date, amount, description, asin, category);
-                    transactions.Add(transaction);
+                        var transaction = new AmazonTransaction(id, date, amount, description, asin, category);
+                        transactions.Add(transaction);
+                    }
+                    catch { }
                 }
             }
 

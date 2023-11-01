@@ -46,7 +46,7 @@
         <!-- Transaction Display Functionality -->
         <DataGrid x:Name="amazonTable" 
                   Grid.Column="1" Grid.Row="5" Grid.ColumnSpan="10"
-                  AutoGenerateColumns="False" ItemsSource="{Binding amazonTransactions}"
+                  AutoGenerateColumns="False" ItemsSource="{Binding amazonTransactions.SelectedTransactions}"
                   Style="{StaticResource AmazonDataGridStyle}" HeadersVisibility="Column" FontSize="14"
                   >
             <DataGrid.Columns>
