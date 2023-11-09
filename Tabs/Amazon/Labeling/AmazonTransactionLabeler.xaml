@@ -5,7 +5,6 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SpendingInfo.Tabs"
         xmlns:tabs="clr-namespace:SpendingInfo.Tabs"
-        xmlns:AmazonTransaction="clr-namespace:SpendingInfo.Transactions"
         xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"         
         mc:Ignorable="d"
         Title="AmazonTransactionLabeler" 
@@ -84,16 +83,26 @@
        
         <Button x:Name="category1Button" Content="Category 1" 
                 Grid.Row="1" Grid.Column="3" Style="{StaticResource categoryButtonStyle}" Margin="0, 0, 0, 10" Click="category1Button_Click"/>
-        <Button x:Name="category2Button" Content="Category 2" Grid.Row="2" Grid.Column="3" Style="{StaticResource categoryButtonStyle}" Margin="0, 0, 0, 10"/>
-        <Button x:Name="category3Button" Content="Category 3" Grid.Row="3" Grid.Column="3" Style="{StaticResource categoryButtonStyle}" Margin="0, 0, 0, 10"/>
-        <Button x:Name="category4Button" Content="Category 4" Grid.Row="4" Grid.Column="3" Style="{StaticResource categoryButtonStyle}" Margin="0, 0, 0, 10"/>
-        <Button x:Name="category5Button" Content="Category 5" Grid.Row="5" Grid.Column="3" Style="{StaticResource categoryButtonStyle}" Margin="0, 0, 0, 10"/>
-        <Button x:Name="category6Button" Content="Category 6" Grid.Row="6" Grid.Column="3" Style="{StaticResource categoryButtonStyle}" Margin="0, 0, 0, 10"/>
-        <Button x:Name="category7Button" Content="Category 7" Grid.Row="7" Grid.Column="3" Style="{StaticResource categoryButtonStyle}" Margin="0, 0, 0, 10"/>
-        <Button x:Name="category8Button" Content="Category 8" Grid.Row="8" Grid.Column="3" Style="{StaticResource categoryButtonStyle}" Margin="0, 0, 0, 10"/>
-        <Button x:Name="category9Button" Content="Category 9" Grid.Row="9" Grid.Column="3" Style="{StaticResource categoryButtonStyle}" Margin="0, 0, 0, 10"/>
-        <Button x:Name="category10Button" Content="Category 10" Grid.Row="10" Grid.Column="3" Style="{StaticResource categoryButtonStyle}" Margin="0, 0, 0, 10"/>
-        <Button x:Name="unknownButton" Content="Unknown" Grid.Row="11" Grid.Column="3" Style="{StaticResource categoryButtonStyle}" Margin="0, 0, 0, 10"/>
+        <Button x:Name="category2Button" Content="Category 2" 
+                Grid.Row="2" Grid.Column="3" Style="{StaticResource categoryButtonStyle}" Margin="0, 0, 0, 10" Click="category2Button_Click"/>
+        <Button x:Name="category3Button" Content="Category 3" 
+                Grid.Row="3" Grid.Column="3" Style="{StaticResource categoryButtonStyle}" Margin="0, 0, 0, 10" Click="category3Button_Click"/>
+        <Button x:Name="category4Button" Content="Category 4" 
+                Grid.Row="4" Grid.Column="3" Style="{StaticResource categoryButtonStyle}" Margin="0, 0, 0, 10" Click="category4Button_Click"/>
+        <Button x:Name="category5Button" Content="Category 5" 
+                Grid.Row="5" Grid.Column="3" Style="{StaticResource categoryButtonStyle}" Margin="0, 0, 0, 10" Click="category5Button_Click"/>
+        <Button x:Name="category6Button" Content="Category 6" 
+                Grid.Row="6" Grid.Column="3" Style="{StaticResource categoryButtonStyle}" Margin="0, 0, 0, 10" Click="category6Button_Click"/>
+        <Button x:Name="category7Button" Content="Category 7" 
+                Grid.Row="7" Grid.Column="3" Style="{StaticResource categoryButtonStyle}" Margin="0, 0, 0, 10" Click="category7Button_Click"/>
+        <Button x:Name="category8Button" Content="Category 8" 
+                Grid.Row="8" Grid.Column="3" Style="{StaticResource categoryButtonStyle}" Margin="0, 0, 0, 10" Click="category8Button_Click"/>
+        <Button x:Name="category9Button" Content="Category 9" 
+                Grid.Row="9" Grid.Column="3" Style="{StaticResource categoryButtonStyle}" Margin="0, 0, 0, 10" Click="category9Button_Click"/>
+        <Button x:Name="category10Button" Content="Category 10" 
+            Grid.Row="10" Grid.Column="3" Style="{StaticResource categoryButtonStyle}" Margin="0, 0, 0, 10" Click="category10Button_Click"/>
+        <Button x:Name="unknownButton" Content="Unknown" 
+                Grid.Row="11" Grid.Column="3" Style="{StaticResource categoryButtonStyle}" Margin="0, 0, 0, 10" Click="unknownButton_Click"/>
 
         <StackPanel Orientation="Horizontal" Grid.Row="12" Grid.Column="3" HorizontalAlignment="Right">
             <Button x:Name="closeLabelingButton" Content=" Close " MaxHeight="30" MaxWidth="100" Click="cancelLabelButton_Click"/>

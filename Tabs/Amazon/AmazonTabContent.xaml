@@ -25,12 +25,13 @@
             <ColumnDefinition Width="auto"/> <!-- [3] Load CSV Button -->
             <ColumnDefinition Width="10"/> <!-- [4] Border -->
             <ColumnDefinition Width="auto"/> <!-- [5] Save CSV Button -->
-            <ColumnDefinition Width="auto"/> <!-- [6] Date Selection StackPanel -->
+            <ColumnDefinition Width="auto"/> <!-- [6] Generate Report button -->
             <ColumnDefinition Width="auto"/> <!-- [7] Manual label button -->
             <ColumnDefinition Width="auto"/> <!-- [8] Automatic label button -->
-            <ColumnDefinition Width="auto"/> <!-- [9] Generate Report button -->
-            <ColumnDefinition Width="*"/> <!-- [10] takes up the rest of the available space -->
-            <ColumnDefinition Width="10"/> <!-- [11] Border -->
+            <ColumnDefinition Width="auto"/> <!-- [9] Date stack panel -->
+            <ColumnDefinition Width="auto"/> <!-- [10] Define/Load Categories -->
+            <ColumnDefinition Width="*"/> <!-- [11] takes up the rest of the available space -->
+            <ColumnDefinition Width="10"/> <!-- [12] Border -->
         </Grid.ColumnDefinitions>
         
         <Grid.RowDefinitions>
@@ -45,10 +46,18 @@
         
         <!-- Transaction Display Functionality -->
         <DataGrid x:Name="amazonTable" 
-                  Grid.Column="1" Grid.Row="5" Grid.ColumnSpan="10"
+                  Grid.Column="1" Grid.Row="5" Grid.ColumnSpan="11"
                   AutoGenerateColumns="False" ItemsSource="{Binding amazonTransactions.SelectedTransactions}"
                   Style="{StaticResource AmazonDataGridStyle}" HeadersVisibility="Column" FontSize="14"
                   >
+
+            <DataGrid.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Delete Transaction" Click="menuDelete_Click"/>
+                    <MenuItem Header="Insert Transaction" Click="menuAdd_Click"/>
+                </ContextMenu>
+            </DataGrid.ContextMenu>
+            
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Date" HeaderStyle="{StaticResource ColumnTitleStyle}" CellStyle="{StaticResource AmazonCellStyle}" MaxWidth="100" 
                                    Binding="{Binding Date, StringFormat='MM/dd/yyy'}" IsReadOnly="True" />
@@ -94,7 +103,7 @@
 
 
         <!-- Date Selection-->
-        <StackPanel Orientation="Vertical" Grid.Row="1" Grid.Column="6" Grid.RowSpan="1" Margin="10, 0, 0, 0">
+        <StackPanel Orientation="Vertical" Grid.Row="1" Grid.Column="9" Grid.RowSpan="1" Margin="10, 0, 0, 0">
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="Start Date:" Width="60" TextAlignment="Left" VerticalAlignment="Center" HorizontalAlignment="Left" Foreground="White"/>
                 <DatePicker SelectedDateFormat="Long" FirstDayOfWeek="Sunday" Width="214" x:Name="amazonStartDateSelector" SelectedDateChanged="amazonStartDateSelector_SelectedDateChanged"/>
@@ -125,15 +134,27 @@
         <!-- TODO: fix styling later to match other buttons -->
         <Button Content="Manually Label Orders" Click="AmazonLabelOrders_Click" Grid.Column="7" Grid.Row="1" Margin="10"/>
 
-        <!-- Other Functionality -->
-        <Button Grid.Row="1" Grid.Column="9" 
+        <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="10">
+            <Button x:Name="categoryDefineButton" Content="Set Categories" Margin="10" Click="categoryDefineButton_Click"/>
+            <Button x:Name="categorySaveButton" Content="Save Categories" Margin="10" Click="categorySaveButton_Click"/>
+            <Button x:Name="categoryLoadButton" Content="Load Categories" Margin="10" Click="categoryLoadButton_Click"/>
+        </StackPanel>
+
+        <!-- Report Functionality -->
+        <!-- This stack panel is only so I could have left margin without making one side of the button too wide -->
+        <StackPanel Orientation="Horizontal" 
+                    Grid.Row="1" Grid.Column="6"
+                    Margin="10, 0, 0, 0"
+                    >
+            <Button                 
                 Style="{StaticResource AmazonGenericButtonStyle}"
-                Click="AmazonReport_Click" 
+                Click="AmazonReport_Click"
                 >
-            <StackPanel Orientation="Vertical">
-                <svgc:SvgViewbox Source="/images/submit-document.svg" Height="41" Margin="0, 2, 0, 5"/>
-                <TextBlock FontFamily="Arial" TextAlignment="Center" Foreground="White" Width="95" Height="15">Generate Report</TextBlock>
-            </StackPanel>
-        </Button>
+                <StackPanel Orientation="Vertical">
+                    <svgc:SvgViewbox Source="/images/submit-document.svg" Height="41" Margin="0, 2, 0, 5"/>
+                    <TextBlock FontFamily="Arial" TextAlignment="Center" Foreground="White" Width="95" Height="15">Generate Report</TextBlock>
+                </StackPanel>
+            </Button>
+        </StackPanel>
     </Grid>
 </UserControl>

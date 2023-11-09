@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Dynamic;
+using System.IO;
+using System.IO.Packaging;
 using System.Linq;
 using static SpendingInfo.Transactions.Transactions.ITransaction;
 
@@ -14,18 +16,18 @@ namespace SpendingInfo.Transactions.Transactions
         private static readonly int UNKNOWN_CATEGORY_INT = -1;
         public static readonly string UNKNOWN_CATEGORY = "Unknown";
 
-        private static IList<string> searchableCategories = new string[] {"tech", "clothes", "other"};
         private static IList<string> categories = new string[] { "Tech", "Clothes", "Other" };
-        public static IList<string> Categories 
+        private static IList<string> searchableCategories = (from c in categories select c.ToLower()).ToList();
+        public static IReadOnlyList<string> Categories 
         { 
             get 
             {
-                return categories;
+                return (IReadOnlyList<string>)categories;
             }
 
             set
             {
-                categories = value;
+                categories = (IList<string>) value;
                 searchableCategories = (from c in value select c.ToLower()).ToList();
             } 
         }
@@ -52,7 +54,7 @@ namespace SpendingInfo.Transactions.Transactions
                     categoryName = UNKNOWN_CATEGORY;
                 }
 
-                NotifyPropertyChanged();
+                NotifyPropertyChanged(nameof(Category));
             }
         } // category string is Categories[category]
 
@@ -138,5 +140,66 @@ namespace SpendingInfo.Transactions.Transactions
 
             return UNKNOWN_CATEGORY_INT; // Unknown
         }
+
+        public class CategoryUtil
+        {
+            public static void AddCategory(string category)
+            {
+                categories.Add(category);
+                searchableCategories.Add(category.ToLower());
+            }
+
+            public static void AddCategories(IList<string> newCategories)
+            {
+                var originalCategories = Categories.ToList();
+                foreach (string category in newCategories)
+                {
+                    AddCategory(category);
+                }
+            }
+
+            public static IReadOnlyList<string> ReadCategories(string path)
+            {
+                List<string> categories = new List<string>();
+                using (FileStream fs = File.OpenRead(path))
+                using (TextReader reader = new StreamReader(fs))
+                {
+                    while (reader.Peek() != -1)
+                    {
+                        categories.Add(reader.ReadLine() ?? UNKNOWN_CATEGORY);
+                    }
+                }
+
+                return categories;
+            }
+
+            public static void Load(string path)
+            {
+                AmazonTransaction.Categories = (IReadOnlyList<string>) ReadCategories(path);
+            }
+
+            public static bool Save(string path)
+            {
+                bool wrote = false;
+                using (FileStream fs = File.OpenWrite(path))
+                using (TextWriter writer = new StreamWriter(fs))
+                {
+                    foreach (string category in AmazonTransaction.Categories)
+                    {
+                        writer.WriteLine(category);
+                    }
+                    wrote = true;
+                }
+
+                return wrote;
+            }
+
+            public static void ReplaceCategories(IList<string> newCategories)
+            {
+                AmazonTransaction.categories.Clear();
+                AddCategories(newCategories);
+            }
+        }
+
     }
 }

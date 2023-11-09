@@ -77,6 +77,7 @@ namespace SpendingInfo.Transactions.Tables
             {
                 allTransactions.Add(transaction);
                 transactionIDs.Add(transaction.GetID());
+                selectedIDs.Add(transaction.GetID());
                 selectedTransactions.Add(transaction);
                 RaiseCollectionChanged(NotifyCollectionChangedAction.Add, transaction);
             }
@@ -122,6 +123,15 @@ namespace SpendingInfo.Transactions.Tables
             transactionIDs.Remove(t.GetID());
             allTransactions.Remove(t);
             RaiseCollectionChanged(NotifyCollectionChangedAction.Remove, t);
+        }
+
+        public void RemoveSelectedAt(int idx)
+        {
+            var transaction = selectedTransactions[idx];
+            selectedTransactions.RemoveAt(idx);
+            transactionIDs.Remove(transaction.GetID());
+            allTransactions.Remove(transaction);
+            RaiseCollectionChanged(NotifyCollectionChangedAction.Remove, transaction);
         }
 
         public ICollection<T> GetAllTransactions()
@@ -175,6 +185,14 @@ namespace SpendingInfo.Transactions.Tables
                 T old = (T) selectedTransactions[transactionIdx];
                 selectedTransactions[transactionIdx] = transaction;
                 RaiseCollectionReplaceChanged(old, transaction);
+            }
+        }
+
+        public void SetTransactionInAll(int transactionIdx, T transaction)
+        {
+            if (transactionIdx != -1)
+            {
+                allTransactions[transactionIdx] = transaction;
             }
         }
 

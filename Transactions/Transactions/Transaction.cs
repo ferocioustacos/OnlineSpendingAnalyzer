@@ -115,6 +115,13 @@ namespace SpendingInfo.Transactions.Transactions
         // Constructor
         private protected TransactionBase(string id, DateTime date, float amount, string description, TransactionType type)
         {
+            this.id = id;
+            this.date = date;
+            this.amount = amount;
+            this.description = description;
+            this.searchableDescription = description;
+            this.type = type;
+
             ID = id;
             Date = date;
             Amount = amount;

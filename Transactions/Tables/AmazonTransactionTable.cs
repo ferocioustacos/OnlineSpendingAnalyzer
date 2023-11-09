@@ -108,11 +108,30 @@ namespace SpendingInfo.Transactions.Tables
             SetTransaction(transactionIdx, transaction);
         }
 
+        public void SetCategoryInAll(int transactionIdx, int categoryIdx) 
+        {
+            AmazonTransaction transaction = new AmazonTransaction(allTransactions[transactionIdx]);
+            transaction.Category = categoryIdx;
+            SetTransactionInAll(transactionIdx, transaction);
+        }
+
+        public void RefreshSelected()
+        {
+            selectedTransactions.Clear();
+            RaiseCollectionChanged(); // send reset event
+
+            foreach(AmazonTransaction t in AllTransactions.Where( t => selectedIDs.Contains(t.GetID()) )) 
+            {
+                selectedTransactions.Add(t);
+                RaiseCollectionChanged(NotifyCollectionChangedAction.Add, t);
+            }
+        }
+
         // TODO: replace with a version that requires a prefix, e.g. "category=Category" or "category={Category1, Category2, ...}"
         //       should also return a pair containing a list of categories and a 'sanitized' query (without search params)
         public int DetermineCategory(string query)
         {
-            IList<string> categories = AmazonTransaction.Categories;
+            IList<string> categories = AmazonTransaction.Categories.ToList();
             for (int i = 0; i < categories.Count; i++)
             {
                 string category = categories[i];
@@ -160,11 +179,11 @@ namespace SpendingInfo.Transactions.Tables
                 {
                     try
                     {
-                        string id = csv.GetField<string>("ID");
+                        string id = csv.GetField<string>("ID") ?? "";
                         DateTime date = csv.GetField<DateTime>("Date");
                         float amount = csv.GetField<float>("Amount");
-                        string description = csv.GetField<string>("Description");
-                        string asin = csv.GetField<string>("ASIN");
+                        string description = csv.GetField<string>("Description") ?? "";
+                        string asin = csv.GetField<string>("ASIN") ?? "";
                         int category = csv.GetField<int>("Category");
 
                         var transaction = new AmazonTransaction(id, date, amount, description, asin, category);
